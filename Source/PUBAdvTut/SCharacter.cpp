@@ -78,7 +78,12 @@ void ASCharacter::PossessedBy(AController* inController){
 
 }	
 
-
+FRotator ASCharacter::GetControllerxRotation(){
+	if(Controller!=nullptr){
+		return Controller->GetControlRotation();
+	}
+	return FRotator::ZeroRotator;
+}
 
 void ASCharacter::Tick(float DeltaTime)
 {
