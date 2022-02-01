@@ -25,6 +25,8 @@ public:
 
 	FRotator GetControllerxRotation();
 
+	void LogIt();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

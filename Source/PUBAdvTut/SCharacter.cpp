@@ -103,22 +103,10 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 }
 
 
-/*
-void ACharacterBase::PossessedBy(AController* inController)
- {
-     ACampaignPlayerController* CPC = Cast<ACampaignPlayerController>(inController);
-     if (CPC)
-     {
-         // Store a pointer to the campaign player controller for convenience:
-         CampaignPlayerController = CPC;
- 
-         // Now call up OnPossess on the campaign player controller, providing it a
-         //  pointer to this character so the controller can later access it easily:
-         CPC->OnPossess(this);
-     }
- }
-
-*/
+void ASCharacter::LogIt(){
+	UE_LOG(LogTemp,Warning,TEXT("Notify"));
+	
+}
 
 
 
