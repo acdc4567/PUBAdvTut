@@ -183,7 +183,7 @@ struct FSTR_ItemWeaponAcc : public FTableRowBase
 	E_WeaponAccType Type;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FText> WeaponIDs;
+	TArray<FName> WeaponIDs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Weight;
@@ -398,7 +398,17 @@ private:
 
 };
 
+USTRUCT(BlueprintType)
+struct FSTR_ItemsGroupLocation : public FTableRowBase
+{
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Location;
+
+	
+
+};
 
 
 
@@ -408,7 +418,7 @@ class PUBADVTUT_API AItemBase : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+
 public:	
 	// Sets default values for this actor's properties
 	AItemBase();
