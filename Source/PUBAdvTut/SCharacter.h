@@ -107,7 +107,7 @@ public:
 
 	virtual void PossessedBy(AController* inController) override;
 
-
+//Getter
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool GetIsAiming() const { return bIsAiming; }
@@ -125,10 +125,22 @@ public:
 	FORCEINLINE float GetForwardValue() const { return ForwardValue; }
 
 
+//Setter
 
-
-
-
+	FORCEINLINE void SetIsProne(bool Value) {  bIsProne=Value; }
+	FORCEINLINE void SetIsCrouching(bool Value) {  bIsCrouching=Value; }
+	FORCEINLINE void SetIsAiming(bool Value) {  bIsAiming=Value; }
+	FORCEINLINE void SetIsDead(bool Value) {  bIsDead=Value; }
+	FORCEINLINE void SetIsHoldWeapon(bool Value) {  bIsHoldWeapon=Value; }
+	FORCEINLINE void SetIsFiring(bool Value) {  bIsFiring=Value; }
+	FORCEINLINE void SetIsEquip(bool Value) {  bIsEquip=Value; }
+	FORCEINLINE void SetIsReload(bool Value) {  bIsReload=Value; }
+	FORCEINLINE void SetIsOnTheAir(bool Value) {  bIsOnTheAir=Value; }
+	FORCEINLINE void SetIsFreeFalling(bool Value) {  bIsFreeFalling=Value; }
+	FORCEINLINE void SetIsUmbrellaOpened(bool Value) {  bIsUmbrellaOpened=Value; }
+	FORCEINLINE void SetIsPlayingMontage(bool Value) {  bIsPlayingMontage=Value; }
+	
+	
 
 
 
