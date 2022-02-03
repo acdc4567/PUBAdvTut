@@ -1,9 +1,17 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+
 
 #include "PUBAdvTutGameMode.h"
 #include "PUBAdvTutCharacter.h"
 #include "ItemsGroup.h"
 #include "Kismet/GameplayStatics.h"
+#include "SGameInstance.h"
+#include "PickupBase.h"
+#include "PickupWeapon.h"
+#include "PickupWeaponAcc.h"
+#include "PickupAmmo.h"
+#include "PickupHealth.h"
+#include "PickupBoost.h"
+#include "PickupEquipment.h"
 #include "UObject/ConstructorHelpers.h"
 
 APUBAdvTutGameMode::APUBAdvTutGameMode()
@@ -42,6 +50,8 @@ APUBAdvTutGameMode::APUBAdvTutGameMode()
 	EquipmentDTablePath=TEXT("DataTable'/Game/Blueprints/Datas/DataTables/DT_ItemEquipment.DT_ItemEquipment'");
 	EquipmentDTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *EquipmentDTablePath));	
 
+	TypesnIDTablePath=TEXT("DataTable'/Game/Blueprints/Datas/DataTables/DT_ItemsTypesAndID.DT_ItemsTypesAndID'");
+	TypesnIDTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *TypesnIDTablePath));	
 
 }
 
@@ -49,15 +59,216 @@ APUBAdvTutGameMode::APUBAdvTutGameMode()
 
 void APUBAdvTutGameMode::BeginPlay(){
 	Super::BeginPlay();
-	GenerateItems();
+
+	GameInstanceRef=Cast<USGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+	GenrateItems();
 	
 }
+
+
+
+
+
+void APUBAdvTutGameMode::GenrateItems(){
+	FSTR_ItemsGroupLocation* ItemsGroupRow = nullptr;
+	TArray<APickupBase*> ItemsObject;
+	TArray<FName> RowNamesx1;
+	RowNamesx1=ItemsGLTableObject->GetRowNames();
+
+	TArray<FTransform> SpawnTransformsx1;
+	
+
+	TArray<FTransform> UsedTransformsx1;
+
+	for(FName& name:RowNamesx1){
+		FString ContextString;
+		ItemsGroupRow = ItemsGLTableObject->FindRow<FSTR_ItemsGroupLocation>(name, ContextString);
+		AItemsGroup* ItemGroupRef;
+		FTransform TempTransform;
+		TempTransform.SetLocation(ItemsGroupRow->Location);
+		TempTransform.SetRotation(FQuat(0,0,0,0));
+		TempTransform.SetScale3D(FVector(1));
+		ItemGroupRef=GetWorld()->SpawnActorDeferred<AItemsGroup>(AItemsGroup::StaticClass(),TempTransform);
+		if(ItemGroupRef){
+		
+			UGameplayStatics::FinishSpawningActor(ItemGroupRef,TempTransform);
+		}
+
+
+
+		TArray<FVector> SpawnLocs=ItemGroupRef->GetAllLocations();
+		for(int32 i=0;i<SpawnLocs.Num();i++){
+			FTransform TempTransformx1;
+			TempTransformx1.SetLocation(SpawnLocs[i]);
+			TempTransformx1.SetRotation(FQuat(0,0,0,0));
+			TempTransformx1.SetScale3D(FVector(1));
+			++NoOfLocations;
+			SpawnTransformsx1.Add(TempTransformx1);
+		}
+	}
+
+	
+
+	TArray<FName> RowNamesx2;
+	RowNamesx2=TypesnIDTableObject->GetRowNames();
+	FSTR_ItemTypesAndID* TypesnIDRow=nullptr;
+	for(FName& name:RowNamesx2){
+		++NoOfItems;
+	}
+
+	for(int32 i=0;i<60;i++){
+		int32 TempRandInt=RandomLocationNo();
+		if(TempRandInt<SpawnTransformsx1.Num()){
+
+		
+			FTransform TempTransformx3=SpawnTransformsx1[TempRandInt];
+			FString ContextStringx1;
+			int32 TempItemNo=RandomItemNo();
+			FString TempString=FString::FromInt(TempItemNo);
+			FName TempIDx1=FName(*TempString);
+			FVector TempVector=TempTransformx3.GetLocation();
+			TypesnIDRow=TypesnIDTableObject->FindRow<FSTR_ItemTypesAndID>(TempIDx1, ContextStringx1);
+			if(TypesnIDRow){
+				if(TempVector!=FVector::ZeroVector){
+
+				
+			
+					if(TypesnIDRow->Type==E_ItemType::EIT_Weapon){
+						APickupWeapon* TempPickupWeapon;
+					
+						TempPickupWeapon=GetWorld()->SpawnActorDeferred<APickupWeapon>(APickupWeapon::StaticClass(),TempTransformx3);
+						if(TempPickupWeapon){
+							TempPickupWeapon->ID=TypesnIDRow->ID;
+							TempPickupWeapon->SN=GameInstanceRef->GenerateSN();
+							TempPickupWeapon->Amount=1;
+						
+							UGameplayStatics::FinishSpawningActor(TempPickupWeapon,TempTransformx3);
+						}
+						APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupWeapon);
+						ItemsObject.Add(TempPickupBase);
+						
+						
+
+
+
+					}
+
+					else if(TypesnIDRow->Type==E_ItemType::EIT_Accessories){
+						APickupWeaponAcc* TempPickupWeaponAcc;
+						
+						TempPickupWeaponAcc=GetWorld()->SpawnActorDeferred<APickupWeaponAcc>(APickupWeaponAcc::StaticClass(),TempTransformx3);
+						if(TempPickupWeaponAcc){
+							TempPickupWeaponAcc->ID=TypesnIDRow->ID;
+							TempPickupWeaponAcc->SN=GameInstanceRef->GenerateSN();
+							TempPickupWeaponAcc->Amount=1;
+						
+							UGameplayStatics::FinishSpawningActor(TempPickupWeaponAcc,TempTransformx3);
+						}
+						APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupWeaponAcc);
+						ItemsObject.Add(TempPickupBase);
+
+
+
+					}
+
+					else if(TypesnIDRow->Type==E_ItemType::EIT_Ammo){
+						APickupAmmo* TempPickupAmmo;
+						
+						TempPickupAmmo=GetWorld()->SpawnActorDeferred<APickupAmmo>(APickupAmmo::StaticClass(),TempTransformx3);
+						if(TempPickupAmmo){
+							TempPickupAmmo->ID=TypesnIDRow->ID;
+							TempPickupAmmo->SN=GameInstanceRef->GenerateSN();
+							TempPickupAmmo->Amount=0;
+						
+							UGameplayStatics::FinishSpawningActor(TempPickupAmmo,TempTransformx3);
+						}
+						APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupAmmo);
+						ItemsObject.Add(TempPickupBase);
+
+
+
+					}
+
+					else if(TypesnIDRow->Type==E_ItemType::EIT_Health){
+						APickupHealth* TempPickupHealth;
+						
+						TempPickupHealth=GetWorld()->SpawnActorDeferred<APickupHealth>(APickupHealth::StaticClass(),TempTransformx3);
+						if(TempPickupHealth){
+							TempPickupHealth->ID=TypesnIDRow->ID;
+							TempPickupHealth->SN=GameInstanceRef->GenerateSN();
+							TempPickupHealth->Amount=1;
+						
+							UGameplayStatics::FinishSpawningActor(TempPickupHealth,TempTransformx3);
+						}
+						APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupHealth);
+						ItemsObject.Add(TempPickupBase);
+
+
+
+					}
+
+
+					else if(TypesnIDRow->Type==E_ItemType::EIT_Boost){
+						APickupBoost* TempPickupBoost;
+						
+						TempPickupBoost=GetWorld()->SpawnActorDeferred<APickupBoost>(APickupBoost::StaticClass(),TempTransformx3);
+						if(TempPickupBoost){
+							TempPickupBoost->ID=TypesnIDRow->ID;
+							TempPickupBoost->SN=GameInstanceRef->GenerateSN();
+							TempPickupBoost->Amount=1;
+						
+							UGameplayStatics::FinishSpawningActor(TempPickupBoost,TempTransformx3);
+						}
+						APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupBoost);
+						ItemsObject.Add(TempPickupBase);
+
+
+
+					}
+
+					else if(TypesnIDRow->Type==E_ItemType::EIT_Helmet||TypesnIDRow->Type==E_ItemType::EIT_Vest||TypesnIDRow->Type==E_ItemType::EIT_Backpack){
+						APickupEquipment* TempPickupEquipment;
+						
+						TempPickupEquipment=GetWorld()->SpawnActorDeferred<APickupEquipment>(APickupEquipment::StaticClass(),TempTransformx3);
+						if(TempPickupEquipment){
+							TempPickupEquipment->ID=TypesnIDRow->ID;
+							TempPickupEquipment->SN=GameInstanceRef->GenerateSN();
+							TempPickupEquipment->Amount=1;
+						
+							UGameplayStatics::FinishSpawningActor(TempPickupEquipment,TempTransformx3);
+						}
+						APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupEquipment);
+						ItemsObject.Add(TempPickupBase);
+
+
+
+					}
+				}
+
+			}
+		}
+	}
+	
+	
+
+	
+
+
+
+
+}
+
+
+
+
 
 
 void APUBAdvTutGameMode::GenerateItems(){
 	FSTR_ItemsGroupLocation* ItemsGroupRow = nullptr;
 	TArray<E_ItemType> ItemsTypeArr;
-	TArray<FSTR_ItemTypesAndID*> ItemsIDArr;
+	TArray<E_ItemType> ItemsEITArr;
+	TArray<FName> ItemsIDArr;
 
 
 	
@@ -66,8 +277,13 @@ void APUBAdvTutGameMode::GenerateItems(){
 
 
 	FSTR_ItemWeapon* WeaponDTableRowx1=nullptr;
+	E_ItemType SpawnType;
+	FName SpawnID;
+	TArray<FTransform> UsedLocations;
+	FTransform SpawnTransformx2;
+	TArray<APickupBase*> ItemsObject;
 
-	for(auto& name:RowNamesx1){
+	for(FName& name:RowNamesx1){
 		
 		FString ContextString;
 		ItemsGroupRow = ItemsGLTableObject->FindRow<FSTR_ItemsGroupLocation>(name, ContextString);
@@ -90,18 +306,23 @@ void APUBAdvTutGameMode::GenerateItems(){
 
 			}
 			else{
-				
+				//continue;
 			}
 		}
 		for(int32 l=0;l<ItemsTypeArr.Num();l++){
-			ItemsIDArr.Add( RandomItemID(ItemsTypeArr[l]) );
+			
+			E_ItemType TempEITx;
+			FName TempNamex;
+			RandomItemID(ItemsTypeArr[l],TempEITx,TempNamex);
+			ItemsIDArr.Add( TempNamex );
+			ItemsEITArr.Add(TempEITx);
 		}
 
 		ItemsTypeArr.Empty();
-
+		/*
 		for(int32 i=0;i<ItemsIDArr.Num();i++){
-			if(ItemsIDArr[i]->Type==E_ItemType::EIT_Weapon){
-				WeaponDTableRowx1=WeaponDTableObject->FindRow<FSTR_ItemWeapon>(ItemsIDArr[i]->ID, ContextString);
+			if(ItemsEITArr[i]==E_ItemType::EIT_Weapon){
+				WeaponDTableRowx1=WeaponDTableObject->FindRow<FSTR_ItemWeapon>(ItemsIDArr[i], ContextString);
 				FSTR_ItemTypesAndID* TempStruct=nullptr;
 				TempStruct->Type=E_ItemType::EIT_Ammo;
 				TempStruct->ID=WeaponDTableRowx1->UseAmmoID;
@@ -114,9 +335,131 @@ void APUBAdvTutGameMode::GenerateItems(){
 				}
 			}
 		}
+		*/
+		for(int32 i=0;i<ItemsIDArr.Num();i++){
+			SpawnType=ItemsEITArr[i];
+			SpawnID=ItemsIDArr[i];
+			FTransform TempTransformx2;
+			
+			SpawnTransformx2=TempTransformx2;
+			//UsedLocations.Add(TempTransformx2);
+			
 
 
-		/*
+			if(SpawnType==E_ItemType::EIT_Weapon){
+				APickupWeapon* TempPickupWeapon;
+				
+				TempPickupWeapon=GetWorld()->SpawnActorDeferred<APickupWeapon>(APickupWeapon::StaticClass(),SpawnTransformx2);
+				if(TempPickupWeapon){
+					TempPickupWeapon->ID=SpawnID;
+					TempPickupWeapon->SN=GameInstanceRef->GenerateSN();
+					TempPickupWeapon->Amount=1;
+				
+					UGameplayStatics::FinishSpawningActor(TempPickupWeapon,SpawnTransformx2);
+				}
+				APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupWeapon);
+				ItemsObject.Add(TempPickupBase);
+
+
+
+			}
+
+			else if(SpawnType==E_ItemType::EIT_Accessories){
+				APickupWeaponAcc* TempPickupWeaponAcc;
+				
+				TempPickupWeaponAcc=GetWorld()->SpawnActorDeferred<APickupWeaponAcc>(APickupWeaponAcc::StaticClass(),SpawnTransformx2);
+				if(TempPickupWeaponAcc){
+					TempPickupWeaponAcc->ID=SpawnID;
+					TempPickupWeaponAcc->SN=GameInstanceRef->GenerateSN();
+					TempPickupWeaponAcc->Amount=1;
+				
+					UGameplayStatics::FinishSpawningActor(TempPickupWeaponAcc,SpawnTransformx2);
+				}
+				APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupWeaponAcc);
+				ItemsObject.Add(TempPickupBase);
+
+
+
+			}
+
+			else if(SpawnType==E_ItemType::EIT_Ammo){
+				APickupAmmo* TempPickupAmmo;
+				
+				TempPickupAmmo=GetWorld()->SpawnActorDeferred<APickupAmmo>(APickupAmmo::StaticClass(),SpawnTransformx2);
+				if(TempPickupAmmo){
+					TempPickupAmmo->ID=SpawnID;
+					TempPickupAmmo->SN=GameInstanceRef->GenerateSN();
+					TempPickupAmmo->Amount=0;
+				
+					UGameplayStatics::FinishSpawningActor(TempPickupAmmo,SpawnTransformx2);
+				}
+				APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupAmmo);
+				ItemsObject.Add(TempPickupBase);
+
+
+
+			}
+
+			else if(SpawnType==E_ItemType::EIT_Health){
+				APickupHealth* TempPickupHealth;
+				
+				TempPickupHealth=GetWorld()->SpawnActorDeferred<APickupHealth>(APickupHealth::StaticClass(),SpawnTransformx2);
+				if(TempPickupHealth){
+					TempPickupHealth->ID=SpawnID;
+					TempPickupHealth->SN=GameInstanceRef->GenerateSN();
+					TempPickupHealth->Amount=1;
+				
+					UGameplayStatics::FinishSpawningActor(TempPickupHealth,SpawnTransformx2);
+				}
+				APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupHealth);
+				ItemsObject.Add(TempPickupBase);
+
+
+
+			}
+
+
+			else if(SpawnType==E_ItemType::EIT_Boost){
+				APickupBoost* TempPickupBoost;
+				
+				TempPickupBoost=GetWorld()->SpawnActorDeferred<APickupBoost>(APickupBoost::StaticClass(),SpawnTransformx2);
+				if(TempPickupBoost){
+					TempPickupBoost->ID=SpawnID;
+					TempPickupBoost->SN=GameInstanceRef->GenerateSN();
+					TempPickupBoost->Amount=1;
+				
+					UGameplayStatics::FinishSpawningActor(TempPickupBoost,SpawnTransformx2);
+				}
+				APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupBoost);
+				ItemsObject.Add(TempPickupBase);
+
+
+
+			}
+
+			else if(SpawnType==E_ItemType::EIT_Helmet||SpawnType==E_ItemType::EIT_Vest||SpawnType==E_ItemType::EIT_Backpack){
+				APickupEquipment* TempPickupEquipment;
+				
+				TempPickupEquipment=GetWorld()->SpawnActorDeferred<APickupEquipment>(APickupEquipment::StaticClass(),SpawnTransformx2);
+				if(TempPickupEquipment){
+					TempPickupEquipment->ID=SpawnID;
+					TempPickupEquipment->SN=GameInstanceRef->GenerateSN();
+					TempPickupEquipment->Amount=1;
+				
+					UGameplayStatics::FinishSpawningActor(TempPickupEquipment,SpawnTransformx2);
+				}
+				APickupBase* TempPickupBase=Cast<APickupBase>(TempPickupEquipment);
+				ItemsObject.Add(TempPickupBase);
+
+
+
+			}
+
+		}
+
+		ItemsIDArr.Empty();
+
+		
 		for(int32 l=0;l<ItemsTypeArr.Num();l++){
 			
 			if(ItemsTypeArr[l]==E_ItemType::EIT_Accessories){
@@ -148,7 +491,7 @@ void APUBAdvTutGameMode::GenerateItems(){
 		}
 		UE_LOG(LogTemp,Warning,TEXT("--------"));
 		ItemsTypeArr.Empty();
-		*/
+		
 		
 		
 
@@ -192,7 +535,7 @@ E_ItemType APUBAdvTutGameMode::RandomItemType(){
 	TArray<FName> RowNamesx1;
 	RowNamesx1=ItemTypePBTableObject->GetRowNames();
 
-	for(auto& name:RowNamesx1){
+	for(FName& name:RowNamesx1){
 		FString ContextString;
 		ItemTypePBRow = ItemTypePBTableObject->FindRow<FSTR_ItemTypeProbability>(name, ContextString);
 		for(int32 k=0;k<ItemTypePBRow->Percentage;k++){
@@ -206,23 +549,26 @@ E_ItemType APUBAdvTutGameMode::RandomItemType(){
 
 }
 
-FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
-	TArray<FSTR_ItemTypesAndID*> Arr;
+void APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1,E_ItemType &RetItemType,FName &RetName){
+	//TArray<FSTR_ItemTypesAndID*> Arr;
 	
+	TArray<E_ItemType> TempRetItemTypes;
+	TArray<FName> TempRetNames;
+
 	if(ItemTypex1==E_ItemType::EIT_Weapon){
 		FSTR_ItemWeapon* ItemWeaponRow=nullptr;
 		
 		
 		TArray<FName> RowNamesx1;
 		RowNamesx1=WeaponDTableObject->GetRowNames();
-		for(auto& name:RowNamesx1){
+		for(FName& name:RowNamesx1){
 			FString ContextString;
 			ItemWeaponRow = WeaponDTableObject->FindRow<FSTR_ItemWeapon>(name, ContextString);
 			for(int32 i=0;i<ItemWeaponRow->ProbabilityPercent;i++){
-				FSTR_ItemTypesAndID* TempStruct=nullptr;
-				TempStruct->Type=E_ItemType::EIT_Weapon;
-				TempStruct->ID=name;
-				Arr.Add(TempStruct);
+				TempRetItemTypes.Add(E_ItemType::EIT_Weapon);
+				TempRetNames.Add(name);
+
+
 			}
 		}
 	}
@@ -239,10 +585,8 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 			FString ContextString;
 			ItemWeaponAccRow = WeaponAccDTableObject->FindRow<FSTR_ItemWeaponAcc>(name, ContextString);
 			
-			FSTR_ItemTypesAndID* TempStruct=nullptr;
-			TempStruct->Type=E_ItemType::EIT_Accessories;
-			TempStruct->ID=name;
-			Arr.Add(TempStruct);
+			TempRetItemTypes.Add(E_ItemType::EIT_Accessories);
+			TempRetNames.Add(name);
 			
 		}
 	}
@@ -252,15 +596,13 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 		
 		
 		TArray<FName> RowNamesx1;
-		RowNamesx1=WeaponDTableObject->GetRowNames();
+		RowNamesx1=AmmoDTableObject->GetRowNames();
 		for(auto& name:RowNamesx1){
 			FString ContextString;
 			ItemAmmoRow = AmmoDTableObject->FindRow<FSTR_ItemAmmo>(name, ContextString);
 			for(int32 i=0;i<ItemAmmoRow->ProbabilityPercent;i++){
-				FSTR_ItemTypesAndID* TempStruct=nullptr;
-				TempStruct->Type=E_ItemType::EIT_Ammo;
-				TempStruct->ID=name;
-				Arr.Add(TempStruct);
+				TempRetItemTypes.Add(E_ItemType::EIT_Ammo);
+				TempRetNames.Add(name);
 			}
 		}
 	}
@@ -276,10 +618,8 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 			FString ContextString;
 			ItemHealthRow = HealthDTableObject->FindRow<FSTR_ItemHealth>(name, ContextString);
 			for(int32 i=0;i<ItemHealthRow->ProbabilityPercent;i++){
-				FSTR_ItemTypesAndID* TempStruct=nullptr;
-				TempStruct->Type=E_ItemType::EIT_Health;
-				TempStruct->ID=name;
-				Arr.Add(TempStruct);
+				TempRetItemTypes.Add(E_ItemType::EIT_Health);
+				TempRetNames.Add(name);
 			}
 		}
 	}
@@ -295,10 +635,8 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 			FString ContextString;
 			ItemBoostRow = BoostDTableObject->FindRow<FSTR_ItemBoost>(name, ContextString);
 			for(int32 i=0;i<ItemBoostRow->ProbabilityPercent;i++){
-				FSTR_ItemTypesAndID* TempStruct=nullptr;
-				TempStruct->Type=E_ItemType::EIT_Boost;
-				TempStruct->ID=name;
-				Arr.Add(TempStruct);
+				TempRetItemTypes.Add(E_ItemType::EIT_Boost);
+				TempRetNames.Add(name);
 			}
 		}
 	}
@@ -315,10 +653,8 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 			if(ItemEquipmentRow->Type==E_ItemType::EIT_Helmet){
 
 				for(int32 i=0;i<ItemEquipmentRow->ProbabilityPercent;i++){
-					FSTR_ItemTypesAndID* TempStruct=nullptr;
-					TempStruct->Type=E_ItemType::EIT_Helmet;
-					TempStruct->ID=name;
-					Arr.Add(TempStruct);
+					TempRetItemTypes.Add(E_ItemType::EIT_Helmet);
+					TempRetNames.Add(name);
 				}
 			}
 		}
@@ -336,10 +672,8 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 			if(ItemEquipmentRow->Type==E_ItemType::EIT_Vest){
 
 				for(int32 i=0;i<ItemEquipmentRow->ProbabilityPercent;i++){
-					FSTR_ItemTypesAndID* TempStruct=nullptr;
-					TempStruct->Type=E_ItemType::EIT_Vest;
-					TempStruct->ID=name;
-					Arr.Add(TempStruct);
+					TempRetItemTypes.Add(E_ItemType::EIT_Vest);
+					TempRetNames.Add(name);
 				}
 			}
 		}
@@ -357,10 +691,8 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 			if(ItemEquipmentRow->Type==E_ItemType::EIT_Backpack){
 
 				for(int32 i=0;i<ItemEquipmentRow->ProbabilityPercent;i++){
-					FSTR_ItemTypesAndID* TempStruct=nullptr;
-					TempStruct->Type=E_ItemType::EIT_Backpack;
-					TempStruct->ID=name;
-					Arr.Add(TempStruct);
+					TempRetItemTypes.Add(E_ItemType::EIT_Backpack);
+					TempRetNames.Add(name);
 				}
 			}
 		}
@@ -368,19 +700,34 @@ FSTR_ItemTypesAndID* APUBAdvTutGameMode::RandomItemID(E_ItemType ItemTypex1){
 	
 	
 	
-	int32 RandomNox1=FMath::RandRange(0,Arr.Num());
-	return Arr[RandomNox1];
+	int32 RandomNox1=FMath::RandRange(0,TempRetItemTypes.Num()-1);
+	RetItemType=TempRetItemTypes[RandomNox1];
+	RetName=TempRetNames[RandomNox1];
 }
 
 
 
+FTransform APUBAdvTutGameMode::RandomLocation(TArray<FTransform> Available){
+
+	int32 RandomNox1=FMath::RandRange(0,Available.Num()-1);
+	return Available[RandomNox1];
+}
 
 
 
+int32 APUBAdvTutGameMode::RandomItemNo(){
+	int32 RandomNox1=FMath::RandRange(0,NoOfItems-1);
+	return RandomNox1;
+}
 
 
 
+int32 APUBAdvTutGameMode::RandomLocationNo(){
 
+	int32 RandomNox1=FMath::RandRange(0,NoOfLocations-1);
+	return RandomNox1;
+
+}
 
 
 

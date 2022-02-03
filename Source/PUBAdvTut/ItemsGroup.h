@@ -37,7 +37,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	UStaticMeshComponent* StaticMesh5;
 
-	TArray<FTransform> GetAllTransforms();
+	TArray<FVector> GetAllLocations();
 
 protected:
 	

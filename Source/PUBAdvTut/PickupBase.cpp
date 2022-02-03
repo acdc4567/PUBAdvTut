@@ -55,7 +55,7 @@ void APickupBase::BeginPlay(){
 	GetWorld()->LineTraceSingleByChannel(HitResult,Start,End,ECollisionChannel::ECC_WorldStatic);
 	
     if(HitResult.bBlockingHit){
-        const FVector Endx{ HitResult.Location + FVector(0.f, 0.f, 10.f) };
+        const FVector Endx{ HitResult.Location + FVector(0.f, 0.f, 30.f) };
         SetActorLocation(Endx);
     }
     

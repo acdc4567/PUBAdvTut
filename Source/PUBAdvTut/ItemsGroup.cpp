@@ -45,14 +45,18 @@ AItemsGroup::AItemsGroup()
 
 }
 
-TArray<FTransform> AItemsGroup::GetAllTransforms(){
-	TArray<FTransform> MeshTransforms;
-
-	MeshTransforms.Add(StaticMesh1->GetComponentTransform());
-	MeshTransforms.Add(StaticMesh2->GetComponentTransform());
-	MeshTransforms.Add(StaticMesh3->GetComponentTransform());
-	MeshTransforms.Add(StaticMesh4->GetComponentTransform());
-	MeshTransforms.Add(StaticMesh5->GetComponentTransform());
+TArray<FVector> AItemsGroup::GetAllLocations(){
+	TArray<FVector> MeshTransforms;
+	FVector SM1Loc=StaticMesh1->GetComponentLocation();
+	FVector SM2Loc=StaticMesh2->GetComponentLocation();
+	FVector SM3Loc=StaticMesh3->GetComponentLocation();
+	FVector SM4Loc=StaticMesh4->GetComponentLocation();
+	FVector SM5Loc=StaticMesh5->GetComponentLocation();
+	MeshTransforms.Add(SM1Loc);
+	MeshTransforms.Add(SM2Loc);
+	MeshTransforms.Add(SM3Loc);
+	MeshTransforms.Add(SM4Loc);
+	MeshTransforms.Add(SM5Loc);
 	return MeshTransforms;
 }
 

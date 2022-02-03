@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+
 
 #pragma once
 
@@ -9,10 +9,14 @@
 #include "PUBAdvTutGameMode.generated.h"
 
 class AItemsGroup;
-
-
-
-
+class USGameInstance;
+class APickupBase;
+class APickupWeapon;
+class APickupWeaponAcc;
+class APickupAmmo;
+class APickupHealth;
+class APickupBoost;
+class APickupEquipment;
 
 
 
@@ -25,13 +29,23 @@ class APUBAdvTutGameMode : public AGameModeBase
 public:
 	APUBAdvTutGameMode();
 
+	
 	void GenerateItems();
+	void GenrateItems();
 
 	int32 RandomItemNumber();
 
+	int32 RandomLocationNo();
+
+	int32 RandomItemNo();
+
+
+
 	E_ItemType RandomItemType();
 
-	FSTR_ItemTypesAndID* RandomItemID(E_ItemType ItemTypex1);
+	void RandomItemID(E_ItemType ItemTypex1,E_ItemType &RetItemType,FName &RetName);
+
+	FTransform RandomLocation(TArray<FTransform> Available);
 
 
 private:
@@ -71,7 +85,15 @@ private:
 
 	UDataTable* EquipmentDTableObject;
 
+	FString TypesnIDTablePath;
 
+	UDataTable* TypesnIDTableObject;
+
+	USGameInstance* GameInstanceRef;
+
+	int32 NoOfLocations=0;
+
+	int32 NoOfItems=0;
 
 
 protected:
