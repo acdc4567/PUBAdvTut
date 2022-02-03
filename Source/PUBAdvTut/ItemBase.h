@@ -410,6 +410,19 @@ struct FSTR_ItemsGroupLocation : public FTableRowBase
 
 };
 
+USTRUCT(BlueprintType)
+struct FSTR_ItemTypesAndID : public FTableRowBase
+{
+	GENERATED_BODY()
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	E_ItemType Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ID;
+
+};
 
 
 
