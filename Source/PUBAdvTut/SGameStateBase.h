@@ -13,5 +13,13 @@ UCLASS()
 class PUBADVTUT_API ASGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
-	
+public:
+
+	int32 LiveAmount;
+
+
+
+
+
+
 };

@@ -4,11 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ItemBase.h"
 #include "SCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class ASPlayerController;
+class ASPlayerState;
+class USkeletalMeshComponent;
+class USGameInstance;
+class AItemWeapon;
+class APickupBase;
 
 UCLASS()
 class PUBADVTUT_API ASCharacter : public ACharacter
@@ -26,6 +32,17 @@ public:
 	FRotator GetControllerxRotation();
 
 	void LogIt();
+
+	UFUNCTION(BlueprintCallable,Category=ChangingWeaponDisplay)
+	void UpdateWeaponDisplay(FName HoldSocket);
+
+	UFUNCTION(BlueprintCallable,Category=ChangingEquipmentDisplay)
+	void UpdateEquipmentDisplay();
+
+	UFUNCTION()
+	void LoggedIt(bool bIsTrue);
+
+	
 
 protected:
 	// Called when the game starts or when spawned
@@ -71,7 +88,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CharacterPose, meta = (AllowPrivateAccess = "true"))
 	bool bIsDead=0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CharacterState, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CharacterState, meta = (AllowPrivateAccess = "true"))
 	bool bIsHoldWeapon=0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CharacterState, meta = (AllowPrivateAccess = "true"))
@@ -97,6 +114,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	bool bIsPlayingMontage=0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	ASPlayerState* PlayerStateRef;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	USGameInstance* GameInstanceRef;
+
+
 
 public:	
 	// Called every frame
@@ -138,10 +163,11 @@ public:
 	FORCEINLINE void SetIsOnTheAir(bool Value) {  bIsOnTheAir=Value; }
 	FORCEINLINE void SetIsFreeFalling(bool Value) {  bIsFreeFalling=Value; }
 	FORCEINLINE void SetIsUmbrellaOpened(bool Value) {  bIsUmbrellaOpened=Value; }
-	FORCEINLINE void SetIsPlayingMontage(bool Value) {  bIsPlayingMontage=Value; }
+	
+	UFUNCTION(BlueprintCallable)
+	void SetIsPlayingMontage(bool Value);
 	
 	
-
 
 
 

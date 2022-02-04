@@ -5,6 +5,9 @@
 #include "SCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "PickupBase.h"
+#include "SGameInstance.h"
+#include "SPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -24,7 +27,13 @@ void ASPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-    
+	GameInstanceRef=Cast<USGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	
+	PlayerStateRef=Cast<ASPlayerState>(PlayerState);
+    if(PlayerStateRef){
+		PlayerStateRef->OnWeaponChanged.AddDynamic(this,&ASPlayerController::Event_WeaponChanged);
+		PlayerStateRef->OnEquipmentChanged.AddDynamic(this,&ASPlayerController::Event_EquipmentChanged);
+	}
 	
 }
 
@@ -35,6 +44,35 @@ void ASPlayerController::OnPossessx(ASCharacter* inCharacter){
 
 
 }
+
+FName ASPlayerController::CalculateHoldGunSocket(){
+	FName GunSocket;
+	if(MyCharacterRef->GetIsProne()){
+		if(MoveForwardAxis==0&&MoveRightAxis==0){
+			GunSocket=GameInstanceRef->GunProneIdleName;
+		}
+		else if(MoveRightAxis==0){
+			GunSocket=GameInstanceRef->GunProneFBName;
+		}
+		else{
+			GunSocket=GameInstanceRef->GunProneOtherName;
+		}
+	}
+	else if(MyCharacterRef->GetIsCrouching()&&!MyCharacterRef->GetIsAiming()){
+		GunSocket=GameInstanceRef->GunCrouchName;
+	}
+	else if(MyCharacterRef->GetIsAiming()||MyCharacterRef->GetIsFiring()){
+		GunSocket=GameInstanceRef->GunAimName;
+	}
+	else if(MyCharacterRef->GetIsReload()){
+		GunSocket=GameInstanceRef->GunReloadName;
+	}
+	else{
+		GunSocket=GameInstanceRef->GunStandName;
+	}
+	return GunSocket;
+}
+
 
 void ASPlayerController::Tick(float DeltaTime)
 {
@@ -73,6 +111,11 @@ void ASPlayerController::SetupInputComponent()
 	
     InputComponent->BindAction("Walk",IE_Pressed ,this, &ASPlayerController::WalkKeyPressed);
 	InputComponent->BindAction("Walk",IE_Released ,this, &ASPlayerController::WalkKeyReleased);
+	
+	InputComponent->BindAction("Interaction",IE_Pressed ,this, &ASPlayerController::InteractionKeyPressed);
+	
+	InputComponent->BindAction("Aiming",IE_Pressed ,this, &ASPlayerController::AimingKeyPressed);
+	InputComponent->BindAction("Aiming",IE_Released ,this, &ASPlayerController::AimingKeyReleased);
 	
 
 }
@@ -123,6 +166,8 @@ void ASPlayerController::MoveForwardKeyPressed(float AxisValue){
     if(MoveForwardAxis!=AxisValue){
         MoveForwardAxis=AxisValue;
         UpdateCameraHeight();
+		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+
     }
     
     
@@ -136,6 +181,7 @@ void ASPlayerController::MoveRightKeyPressed(float AxisValue){
     if(MoveRightAxis!=AxisValue){
         MoveRightAxis=AxisValue;
         UpdateCameraHeight();
+		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
     }
     
     
@@ -214,6 +260,8 @@ void ASPlayerController::CrouchKeyPressed(){
     
     LimitPitchAngle(0.f);
     UpdateCameraHeight();
+	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+
 
 }
 
@@ -243,7 +291,7 @@ void ASPlayerController::ProneKeyPressed(){
     
     LimitPitchAngle(0.f);
     UpdateCameraHeight();
-
+	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
 
 }
 
@@ -558,6 +606,39 @@ void ASPlayerController::HandleWalkSpeedFromTable(){
 		WalkSpeed=WalkSpeed*PlayerStateRef->GetHoldGun()->ItemWeaponRow->WalkSpeedPer;
 	}
     */
+}
+
+void ASPlayerController::InteractionKeyPressed(){
+
+	
+
+}
+
+void ASPlayerController::Event_WeaponChanged(AItemWeapon * Weapon, E_WeaponPosition Position, bool bIsOnHand ){
+	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+
+
+}
+
+void ASPlayerController::Event_EquipmentChanged( AItemBase* Equipment,bool bIsAdd ){
+
+	MyCharacterRef->UpdateEquipmentDisplay();
+	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+
+}
+
+void ASPlayerController::AimingKeyPressed(){
+
+	MyCharacterRef->SetIsAiming(1);
+	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+
+}
+
+void ASPlayerController::AimingKeyReleased(){
+
+	MyCharacterRef->SetIsAiming(0);
+	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+
 }
 
 

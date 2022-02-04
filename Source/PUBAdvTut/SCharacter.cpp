@@ -5,7 +5,24 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ItemWeapon.h"
+#include "ItemHealth.h"
+#include "ItemBoost.h"
+#include "ItemEquipment.h"
+#include "PickupBase.h"
+#include "PickupWeapon.h"
+#include "PickupWeaponAcc.h"
+#include "PickupAmmo.h"
+#include "PickupBoost.h"
+#include "PickupEquipment.h"
+#include "PickupHealth.h"
+#include "SPlayerState.h"
+#include "SGameInstance.h"
 #include "SPlayerController.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Kismet/GameplayStatics.h"
+
 
 
 ASCharacter::ASCharacter()
@@ -32,6 +49,17 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+
+	if(Controller!=nullptr){
+		PlayerStateRef=Cast<ASPlayerState>(Controller->PlayerState);
+
+		
+	}
+
+	GameInstanceRef=Cast<USGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+
+
 }
 
 
@@ -64,6 +92,98 @@ void ASCharacter::MouseLookup(float AxisValue){
 	AddControllerPitchInput(AxisValue * LookupScaleFactor);
 
 
+
+}
+
+void ASCharacter::UpdateWeaponDisplay(FName HoldSocket){
+	if(HoldSocket!=TEXT("N")){											//!bIsSightAiming
+
+	
+		if(HoldSocket!=TEXT("None")){
+
+			if(PlayerStateRef->GetHoldGun()){
+				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(HoldSocket);
+				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+				PlayerStateRef->GetHoldGun()->SetActorTransform(SocketTransform);
+				PlayerStateRef->GetHoldGun()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),HoldSocket);
+
+			}
+		}
+		bool bIsEquipBackpack;
+
+
+		TArray<AItemBase*> GetEquipmentsx1=PlayerStateRef->GetEquipments();
+		for(int32 i=0;i<GetEquipmentsx1.Num();i++){
+			if(GetEquipmentsx1[i]->ItemType==E_ItemType::EIT_Backpack){
+				bIsEquipBackpack=true;
+			}
+		}
+
+
+		if(PlayerStateRef->GetWeapon1()){
+			if(bIsEquipBackpack){
+				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackLeftBName);
+				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+				PlayerStateRef->GetWeapon1()->SetActorTransform(SocketTransform);
+				PlayerStateRef->GetWeapon1()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackLeftBName);
+
+			}
+			else{
+				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackLeftNName);
+				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+				PlayerStateRef->GetWeapon1()->SetActorTransform(SocketTransform);
+				PlayerStateRef->GetWeapon1()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackLeftNName);
+
+			}
+		}
+
+		if(PlayerStateRef->GetWeapon2()){
+			if(bIsEquipBackpack){
+				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackRightBName);
+				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+				PlayerStateRef->GetWeapon2()->SetActorTransform(SocketTransform);
+				PlayerStateRef->GetWeapon2()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackRightBName);
+
+			}
+			else{
+				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackRightNName);
+				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+				PlayerStateRef->GetWeapon2()->SetActorTransform(SocketTransform);
+				PlayerStateRef->GetWeapon2()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackRightNName);
+
+			}
+		}
+
+	}
+}
+
+void ASCharacter::UpdateEquipmentDisplay(){
+	TArray<AItemBase*> GetEquipmentsx1=PlayerStateRef->GetEquipments();
+	for(int32 i=0;i<GetEquipmentsx1.Num();i++){
+		if(GetEquipmentsx1[i]->ItemType==E_ItemType::EIT_Helmet){
+			const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->HelmetName);
+			const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+			GetEquipmentsx1[i]->SetActorTransform(SocketTransform);
+			GetEquipmentsx1[i]->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->HelmetName);
+
+		}
+		if(GetEquipmentsx1[i]->ItemType==E_ItemType::EIT_Vest){
+			const USkeletalMeshSocket* SKMSocket =GetMesh()->GetSocketByName(GameInstanceRef->VestName);
+			const FTransform SocketTransform = SKMSocket->GetSocketTransform(GetMesh());
+			GetEquipmentsx1[i]->SetActorTransform(SocketTransform);
+			GetEquipmentsx1[i]->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->VestName);
+
+		}
+		if(GetEquipmentsx1[i]->ItemType==E_ItemType::EIT_Backpack){
+			const USkeletalMeshSocket* SKMSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackpackName);
+			const FTransform SocketTransform = SKMSocket->GetSocketTransform(GetMesh());
+			GetEquipmentsx1[i]->SetActorTransform(SocketTransform);
+			GetEquipmentsx1[i]->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackpackName);
+
+		}
+	}
+
+	
 
 }
 
@@ -125,6 +245,20 @@ void ASCharacter::LogIt(){
 
 
 
+
+
+void ASCharacter::LoggedIt(bool bIsTrue){
+	if(bIsTrue){
+		UE_LOG(LogTemp,Warning,TEXT("DelegateRecieved"));
+	}
+	
+
+}
+
+
+void ASCharacter::SetIsPlayingMontage(bool Value){
+	bIsPlayingMontage=Value;
+}
 
 
 

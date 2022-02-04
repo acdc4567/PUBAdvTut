@@ -7,9 +7,12 @@
 #include "Engine/DataTable.h"
 #include "SPlayerController.generated.h"
 
+
+
 class ASCharacter;
-
-
+class APickupBase;
+class USGameInstance;
+class ASPlayerState;
 
 USTRUCT(BlueprintType)
 struct FSTR_ProneTime : public FTableRowBase
@@ -63,6 +66,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void LimitPitchAngleExcess(bool bGreater,float Value);
 
+	TArray<APickupBase* > PickupItems;
+
+	TArray<APickupBase* > ItemsInRange;
+	
+	UFUNCTION()
+	void Event_WeaponChanged(AItemWeapon * Weapon, E_WeaponPosition Position, bool bIsOnHand );
+
+	UFUNCTION()
+	void Event_EquipmentChanged( AItemBase* Equipment,bool bIsAdd );
 
 protected:
 	virtual void BeginPlay() override;
@@ -113,6 +125,14 @@ protected:
 	void RunKeyReleased();
 
 	void HandleWalkSpeedFromTable();
+
+	FName CalculateHoldGunSocket();
+
+	void InteractionKeyPressed();
+
+	void AimingKeyPressed();
+
+	void AimingKeyReleased();
 
 private:
 
@@ -200,8 +220,16 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	bool bRunPressed=0;
 
+	USGameInstance* GameInstanceRef;
+
+	ASPlayerState* PlayerStateRef;
+
+
 public:
 	void OnPossessx(ASCharacter* inCharacter);
 
 	virtual void SetupInputComponent() override;
+
+
+	
 };
