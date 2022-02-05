@@ -378,6 +378,8 @@ enum class E_ShootMode : uint8
 };
 
 
+
+
 USTRUCT(BlueprintType)
 struct FGate
 {
@@ -424,7 +426,18 @@ struct FSTR_ItemTypesAndID : public FTableRowBase
 
 };
 
+UENUM(BlueprintType)
+enum class E_MontageType : uint8
+{
+	EMT_Equip UMETA(DisplayName = "Equip"),
+	EMT_UnEquip UMETA(DisplayName = "UnEquip"),
+	EMT_Reload UMETA(DisplayName = "Reload"),
+	EMT_ReloadBullet UMETA(DisplayName = "ReloadBullet"),
+	EMT_Fire UMETA(DisplayName = "Fire"),
+	EMT_Use UMETA(DisplayName = "Use")
 
+	
+};
 
 UCLASS()
 class PUBADVTUT_API AItemBase : public AActor

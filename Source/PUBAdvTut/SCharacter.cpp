@@ -228,7 +228,175 @@ void ASCharacter::LogIt(){
 	
 }
 
+void ASCharacter::PlayMontage(E_MontageType MontageType,float PlayRatex1){
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	PlayingMontageType=MontageType;
+	bIsPlayingMontage=true;
+	if(bIsProne){
+		switch (MontageType)
+		{
+			case E_MontageType::EMT_Equip:
+				if (AnimInstance && ProneEquipMontage)
+				{
+					AnimInstance->Montage_Play(ProneEquipMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
 
+			case E_MontageType::EMT_UnEquip:
+				if (AnimInstance && ProneUnEquipMontage)
+				{
+					AnimInstance->Montage_Play(ProneUnEquipMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_Reload:
+				if (AnimInstance && ProneReloadMontage)
+				{
+					AnimInstance->Montage_Play(ProneReloadMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_ReloadBullet:
+				if (AnimInstance && ProneReloadMontage)
+				{
+					AnimInstance->Montage_Play(ProneReloadMontage,PlayRatex1);
+					AnimInstance->Montage_JumpToSection(FName("ReloadBullet"));
+				}
+			break;
+			case E_MontageType::EMT_Fire:
+				if (AnimInstance && ProneFireMontage)
+				{
+					AnimInstance->Montage_Play(ProneFireMontage,0.466f);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+			case E_MontageType::EMT_Use:
+				if (AnimInstance && ProneUseMontage)
+				{
+					AnimInstance->Montage_Play(ProneUseMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+
+			
+			
+		}
+	}
+	else if(bIsCrouching){
+		switch (MontageType)
+		{
+			case E_MontageType::EMT_Equip:
+				if (AnimInstance && CrouchEquipMontage)
+				{
+					AnimInstance->Montage_Play(CrouchEquipMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_UnEquip:
+				if (AnimInstance && CrouchUnEquipMontage)
+				{
+					AnimInstance->Montage_Play(CrouchUnEquipMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_Reload:
+				if (AnimInstance && CrouchReloadMontage)
+				{
+					AnimInstance->Montage_Play(CrouchReloadMontage,PlayRatex1);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_ReloadBullet:
+				if (AnimInstance && CrouchReloadMontage)
+				{
+					AnimInstance->Montage_Play(CrouchReloadMontage);
+					AnimInstance->Montage_JumpToSection(FName("ReloadBullet"));
+				}
+			break;
+			case E_MontageType::EMT_Fire:
+				if (AnimInstance && CrouchFireMontage)
+				{
+					AnimInstance->Montage_Play(CrouchFireMontage,2.f);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+			case E_MontageType::EMT_Use:
+				if (AnimInstance && CrouchUseMontage)
+				{
+					AnimInstance->Montage_Play(CrouchUseMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+
+			
+			
+		}
+	}
+	else{
+		switch (MontageType)
+		{
+			case E_MontageType::EMT_Equip:
+				if (AnimInstance && EquipMontage)
+				{
+					AnimInstance->Montage_Play(EquipMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_UnEquip:
+				if (AnimInstance && UnEquipMontage)
+				{
+					AnimInstance->Montage_Play(UnEquipMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_Reload:
+				if (AnimInstance && ReloadMontage)
+				{
+					AnimInstance->Montage_Play(ReloadMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+			case E_MontageType::EMT_ReloadBullet:
+				if (AnimInstance && ReloadMontage)
+				{
+					AnimInstance->Montage_Play(ReloadMontage);
+					AnimInstance->Montage_JumpToSection(FName("ReloadBullet"));
+				}
+			break;
+			case E_MontageType::EMT_Fire:
+				if (AnimInstance && FireMontage)
+				{
+					AnimInstance->Montage_Play(FireMontage,2.f);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+			case E_MontageType::EMT_Use:
+				if (AnimInstance && UseMontage)
+				{
+					AnimInstance->Montage_Play(UseMontage);
+					AnimInstance->Montage_JumpToSection(FName("Default"));
+				}
+			break;
+
+
+			
+			
+		}
+	}
+
+
+}
 
 
 
@@ -261,6 +429,15 @@ void ASCharacter::SetIsPlayingMontage(bool Value){
 }
 
 
+void ASCharacter::TakeBackWeapon(){
+
+	MyPlayerControllerRef->TakeBackWeapon();
+
+}
+
+void ASCharacter::EquipWeapon(){
+	MyPlayerControllerRef->EquipWeapon();
+}
 
 
 

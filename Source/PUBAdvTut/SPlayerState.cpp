@@ -4,6 +4,7 @@
 #include "SPlayerState.h"
 #include "ItemBase.h"
 #include "ItemWeapon.h"
+#include "ItemAmmo.h"
 #include "Kismet/GameplayStatics.h"
 #include "SGameInstance.h"
 
@@ -84,13 +85,13 @@ void ASPlayerState::SetHoldGun(AItemWeapon* Weapon){
 
 void ASPlayerState::SetAmmo556(int32 Ammo556x){
     Ammo556 = Ammo556x;
-    //UpdateAmmoObject();
+    UpdateAmmoObject();
     OnAmmoChanged.Broadcast(true);
 }
 
 void ASPlayerState::SetAmmo762(int32 Ammo762x){
     Ammo762 = Ammo762x;
-    //UpdateAmmoObject();
+    UpdateAmmoObject();
     OnAmmoChanged.Broadcast(true);
 }
 
@@ -131,7 +132,7 @@ bool ASPlayerState::RemoveItemsInBackpack(AItemBase* Item){
 }
 
 
-/*
+
 
 
 bool ASPlayerState::CheckBackpackCapacity(int32 AddWeight){
@@ -158,11 +159,11 @@ bool ASPlayerState::CheckBackpackCapacity(int32 AddWeight){
 }
 
 
-*/
 
 
 
-/*
+
+
 void ASPlayerState::UpdateAmmoObject(){
     AItemBase* Ammo1;
     AItemBase* Ammo2;
@@ -193,7 +194,7 @@ void ASPlayerState::UpdateAmmoObject(){
                 
                 TempAmmo->ID=TEXT("1");
                 
-                TempAmmo->SN=GameInstanceRef->GenrateSN();
+                TempAmmo->SN=GameInstanceRef->GenerateSN();
                 TempAmmo->Amount=GetAmmo556();	
                 
                 
@@ -230,7 +231,7 @@ void ASPlayerState::UpdateAmmoObject(){
                 
                 TempAmmo->ID=TEXT("2");
                 
-                TempAmmo->SN=GameInstanceRef->GenrateSN();
+                TempAmmo->SN=GameInstanceRef->GenerateSN();
                 TempAmmo->Amount=GetAmmo762();	
                 
                 
@@ -257,7 +258,7 @@ void ASPlayerState::UpdateAmmoObject(){
 
 
 
-*/
+
 
 
 
@@ -298,7 +299,7 @@ void ASPlayerState::UpdateAmmoAmount(FName IDx1,bool bIsAdd,int32 Amountx1){
 
 
 
-/*
+
 bool ASPlayerState::CheckReplaceBackpack(AItemBase* Item){
     
     int32 ItemsWeight=0;
@@ -326,7 +327,7 @@ bool ASPlayerState::CheckReplaceBackpack(AItemBase* Item){
     return false;
 
 }
-*/
+
 
 
 

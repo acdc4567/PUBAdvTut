@@ -16,6 +16,10 @@ class USGameInstance;
 class AItemWeapon;
 class APickupBase;
 
+
+
+
+
 UCLASS()
 class PUBADVTUT_API ASCharacter : public ACharacter
 {
@@ -41,6 +45,16 @@ public:
 
 	UFUNCTION()
 	void LoggedIt(bool bIsTrue);
+
+	//Play Animation
+	UFUNCTION()
+	void PlayMontage(E_MontageType MontageType,float PlayRatex1=1.f);
+	
+	void BeginPlayMontage();
+
+	void TakeBackWeapon();
+
+	void EquipWeapon();
 
 	
 
@@ -77,7 +91,10 @@ private:
 	ASPlayerController* MyPlayerControllerRef;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	bool bIsAiming;
+	bool bIsAiming=0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	bool bIsSightAiming=0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CharacterPose, meta = (AllowPrivateAccess = "true"))
 	bool bIsCrouching=0;
@@ -122,6 +139,58 @@ private:
 	USGameInstance* GameInstanceRef;
 
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerAnimState, meta = (AllowPrivateAccess = "true"))
+	E_MontageType PlayingMontageType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ProneEquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ProneUnEquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ProneReloadMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ProneFireMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ProneUseMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* CrouchEquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* CrouchUnEquipMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* CrouchReloadMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* CrouchFireMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* CrouchUseMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* UnEquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ReloadMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* FireMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* UseMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* FPSArmFireMontage;
+
+
 
 public:	
 	// Called every frame
@@ -148,7 +217,8 @@ public:
 	FORCEINLINE bool GetIsUmbrellaOpened() const { return bIsUmbrellaOpened; }
 	FORCEINLINE bool GetIsPlayingMontage() const { return bIsPlayingMontage; }
 	FORCEINLINE float GetForwardValue() const { return ForwardValue; }
-
+	FORCEINLINE bool GetIsSightAiming() const { return bIsSightAiming; }
+	
 
 //Setter
 

@@ -9,7 +9,7 @@ void UAN_Equip_Crouch::Notify(USkeletalMeshComponent* MeshComp,UAnimSequenceBase
     if(MeshComp!=NULL&&MeshComp->GetOwner()!=NULL){
         ASCharacter* MyCharacterRef=Cast<ASCharacter>(MeshComp->GetOwner());
         if(MyCharacterRef!=NULL){
-            MyCharacterRef->LogIt();
+            MyCharacterRef->EquipWeapon();
         }   
     }
 }

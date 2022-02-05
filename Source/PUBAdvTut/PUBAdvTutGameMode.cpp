@@ -12,6 +12,7 @@
 #include "PickupHealth.h"
 #include "PickupBoost.h"
 #include "PickupEquipment.h"
+#include "SPlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 
 APUBAdvTutGameMode::APUBAdvTutGameMode()
@@ -62,7 +63,12 @@ void APUBAdvTutGameMode::BeginPlay(){
 
 	GameInstanceRef=Cast<USGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
-	GenrateItems();
+	PlayerControllerRef=Cast<ASPlayerController>(UGameplayStatics::GetPlayerController(this,0));
+	
+	if(PlayerControllerRef){
+		PlayerControllerRef->SetPickupItems(GenrateItems());
+	}
+	
 	
 }
 
@@ -70,7 +76,7 @@ void APUBAdvTutGameMode::BeginPlay(){
 
 
 
-void APUBAdvTutGameMode::GenrateItems(){
+TArray<APickupBase*> APUBAdvTutGameMode::GenrateItems(){
 	FSTR_ItemsGroupLocation* ItemsGroupRow = nullptr;
 	TArray<APickupBase*> ItemsObject;
 	TArray<FName> RowNamesx1;
@@ -250,7 +256,7 @@ void APUBAdvTutGameMode::GenrateItems(){
 		}
 	}
 	
-	
+	return ItemsObject;
 
 	
 

@@ -17,6 +17,7 @@ class APickupAmmo;
 class APickupHealth;
 class APickupBoost;
 class APickupEquipment;
+class ASPlayerController;
 
 
 
@@ -29,9 +30,11 @@ class APUBAdvTutGameMode : public AGameModeBase
 public:
 	APUBAdvTutGameMode();
 
-	
+	//FakeFunction
 	void GenerateItems();
-	void GenrateItems();
+
+	//RealFunction
+	TArray<APickupBase*> GenrateItems();
 
 	int32 RandomItemNumber();
 
@@ -94,6 +97,8 @@ private:
 	int32 NoOfLocations=0;
 
 	int32 NoOfItems=0;
+
+	ASPlayerController* PlayerControllerRef;
 
 
 protected:

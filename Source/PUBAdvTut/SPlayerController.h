@@ -5,14 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/DataTable.h"
+#include "ItemBase.h"
 #include "SPlayerController.generated.h"
 
 
-
+class UBoxComponent;
 class ASCharacter;
 class APickupBase;
 class USGameInstance;
 class ASPlayerState;
+class AItemWeapon;
 
 USTRUCT(BlueprintType)
 struct FSTR_ProneTime : public FTableRowBase
@@ -76,6 +78,17 @@ public:
 	UFUNCTION()
 	void Event_EquipmentChanged( AItemBase* Equipment,bool bIsAdd );
 
+	void SetPickupItems(TArray<APickupBase*> Items);
+
+	UFUNCTION()
+	void UpdateCharacterGunState();
+
+	void TakeBackWeapon();
+
+	void EquipWeapon();
+
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -134,6 +147,59 @@ protected:
 
 	void AimingKeyReleased();
 
+	void BeginPickupItem();
+
+	void PickupWeapon(class APickupWeapon* PickupWeaponx1,bool bIsAssign,E_WeaponPosition Position1);
+	
+	bool PickupItem();
+
+	UFUNCTION()
+	void ExecBeginOverlap(APickupBase* PickupObject);
+
+	UFUNCTION()
+	void ExecEndOverlap(APickupBase* PickupObject);
+
+	void OutlineItem(APickupBase* Item);
+
+	void TargetingItem();
+
+	//Items->PickupWeapon
+	void AutoPosition(E_WeaponPosition &Positionx,bool &bIsOnHandx);
+
+	void AssignPosition(const E_WeaponPosition Assign,E_WeaponPosition &Positionx,bool &bIsOnHandx);
+
+	void SpawnPickupItem(AItemBase* ItemBasex1,APickupBase* &PickupItemx1);
+
+	void CompleteSpawnPickupItem(APickupBase* PickupItemx1);
+
+	//Items->PickupEquipment
+
+	bool PickupEquipment(APickupBase* PickupBasex1);
+
+
+	//Items->Discard
+
+	void BeginDiscard();
+
+	void DiscardWeapon(AItemWeapon* ItemWeaponx1);
+
+	void TakeBackGunMontage();
+
+	void Keyboard1KeyPressed();
+
+	void Keyboard2KeyPressed();
+
+	bool PickupGoods(APickupBase* PickupBasex1);
+	
+	
+	void DiscardItem(AItemBase* Itemx1);
+
+	bool DiscardEquipment(AItemBase* Itemx1,bool bIsCheck);
+
+	bool EquipAccessories(AItemBase* ItemBasex1,bool bIsFromGround,AItemWeapon* Weaponx1);
+
+	bool RemoveAccessories(AItemBase* ItemAccx1,bool bIsToGround,AItemWeapon* Weaponx1);
+
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -188,10 +254,10 @@ private:
 	float StandCameraHeight=80.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	float CrouchCameraHeight=40.f;
+	float CrouchCameraHeight=60.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	float CrouchRunCameraHeight=50.f;
+	float CrouchRunCameraHeight=60.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float CrouchRifleMoveCameraHeight=60.f;
@@ -220,9 +286,18 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	bool bRunPressed=0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	AItemWeapon* ReadyEquipWeapon;
+
 	USGameInstance* GameInstanceRef;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerState, meta = (AllowPrivateAccess = "true"))
 	ASPlayerState* PlayerStateRef;
+
+	APickupBase* ReadyPickupItem;
+
+	
+
 
 
 public:

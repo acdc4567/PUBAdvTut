@@ -20,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnWeaponAccChangedSignature, AIte
 class AItemBase;
 class AItemWeapon;
 class USGameInstance;
-
+class AItemAmmo;
 
 /**
  * 
@@ -49,16 +49,15 @@ class PUBADVTUT_API ASPlayerState : public APlayerState
 	float GetEnergyPoint();
 
 	TArray<AItemBase*> GetEquipments();
-
+	
+	
 	TArray<AItemBase*> GetItemsInBackpack();
 
 //SetterFunctions
 	void SetWeapon1(AItemWeapon* Weapon);
 	
-	UFUNCTION(BlueprintCallable)
 	void SetWeapon2(AItemWeapon* Weapon);
 
-	UFUNCTION(BlueprintCallable)
 	void SetHoldGun(AItemWeapon* Weapon);
 
 	void SetAmmo556(int32 Ammo556x);
@@ -83,13 +82,13 @@ class PUBADVTUT_API ASPlayerState : public APlayerState
 //Backpack
 	bool RemoveItemsInBackpack(AItemBase* Item);
 
-	//bool CheckBackpackCapacity(int32 AddWeight);
+	bool CheckBackpackCapacity(int32 AddWeight);
 
-	//bool CheckReplaceBackpack(AItemBase* Item);
+	bool CheckReplaceBackpack(AItemBase* Item);
 
 
 //Ammo
-	//void UpdateAmmoObject();
+	void UpdateAmmoObject();
 
 	void UpdateAmmoAmount(FName IDx1,bool bIsAdd,int32 Amountx1);
 
@@ -166,6 +165,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable,Category="Events")
 	FOnWeaponAccChangedSignature OnWeaponAccChanged;
+
+
 
 
 	FSTR_ItemEquipment* ItemEquipmentRow;
