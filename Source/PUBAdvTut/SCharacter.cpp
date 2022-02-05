@@ -39,8 +39,12 @@ ASCharacter::ASCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); 
 	FollowCamera->bUsePawnControlRotation = false; 
 
-	
+	FPSCamera=CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCamera"));
+	FPSCamera->SetupAttachment(RootComponent);
+	FPSCamera->bUsePawnControlRotation = true; 
 
+	FPSArms=CreateDefaultSubobject<USkeletalMeshComponent>("FPSArms");
+	FPSArms->SetupAttachment(FPSCamera);
 
 }
 

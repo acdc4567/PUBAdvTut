@@ -235,7 +235,8 @@ void ASPlayerController::SetCharRotation(){
 
 
 void ASPlayerController::AltKeyPressed(){
-    bIsAltPressed=true;
+	ReverseHoldAiming();
+	bIsAltPressed=true;
     AltPressedRotation= MyCharacterRef->GetCameraBoom()->GetTargetRotation();
 
 
@@ -299,13 +300,14 @@ void ASPlayerController::ProneKeyPressed(){
         if(MyCharacterRef->GetIsCrouching()){
             MyCharacterRef->SetIsCrouching(0);
             MyCharacterRef->SetIsProne(1);
-            MyCharacterRef->SetIsAiming(0);
-            HandleProneTimeFromTable(3,2);
+           
+			ReverseHoldAiming();
+			HandleProneTimeFromTable(3,2);
 
         }
         else{
             MyCharacterRef->SetIsProne(1);
-            MyCharacterRef->SetIsAiming(0);
+            ReverseHoldAiming();
             HandleProneTimeFromTable(1,3);
         }
 
@@ -321,24 +323,28 @@ void ASPlayerController::ProneKeyPressed(){
 
 
 void ASPlayerController::JumpKeyPressed(){
-    if(MyCharacterRef->GetIsProne()){
-        MyCharacterRef->SetIsProne(0);
-        MyCharacterRef->SetIsCrouching(1);
+    if(!MyCharacterRef->GetIsAiming()){
+
+	
+
+		if(MyCharacterRef->GetIsProne()){
+			MyCharacterRef->SetIsProne(0);
+			MyCharacterRef->SetIsCrouching(1);
 
 
-    }
-    else{
-        if(MyCharacterRef->GetIsCrouching()){
-            MyCharacterRef->SetIsCrouching(0);
+		}
+		else{
+			if(MyCharacterRef->GetIsCrouching()){
+				MyCharacterRef->SetIsCrouching(0);
 
-        }
-        else{
-            MyCharacterRef->Jump();
+			}
+			else{
+				MyCharacterRef->Jump();
 
-        }
-    }
-    UpdateCameraHeight();
-
+			}
+		}
+		UpdateCameraHeight();
+	}
 }
 
 
@@ -650,18 +656,40 @@ void ASPlayerController::Event_EquipmentChanged( AItemBase* Equipment,bool bIsAd
 }
 
 void ASPlayerController::AimingKeyPressed(){
+	if(MyCharacterRef->GetIsHoldWeapon()){
+		bHoldAiming=1;
+		MyCharacterRef->SetIsAiming(1);
+		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+		MyCharacterRef->HoldAiming(1);
 
-	MyCharacterRef->SetIsAiming(1);
-	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+	}
+
+	
+	
 
 }
 
 void ASPlayerController::AimingKeyReleased(){
+	if(bHoldAiming){
+		bHoldAiming=0;
+	
+		MyCharacterRef->SetIsAiming(0);
+		MyCharacterRef->HoldAiming(0);
+		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+	}
+}
 
-	MyCharacterRef->SetIsAiming(0);
-	MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+void ASPlayerController::ReverseHoldAiming(){
+	if(bHoldAiming){
+		bHoldAiming=0;
+	
+		MyCharacterRef->SetIsAiming(0);
+		MyCharacterRef->HoldAiming(0);
+		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+	}
 
 }
+
 
 void ASPlayerController::SetPickupItems(TArray<APickupBase*> Items){
 	PickupItems=Items;
@@ -959,7 +987,7 @@ void ASPlayerController::BeginDiscard(){
 		if(!MyCharacterRef->GetIsPlayingMontage()){
 			if(PlayerStateRef->GetHoldGun()){
 				DiscardWeapon(PlayerStateRef->GetHoldGun());
-				AimingKeyReleased();
+				ReverseHoldAiming();
 			}
 			else if(PlayerStateRef->GetWeapon1()){
 				DiscardWeapon(PlayerStateRef->GetWeapon1());
@@ -1644,6 +1672,7 @@ bool ASPlayerController::RemoveAccessories(AItemBase* ItemAccx1,bool bIsToGround
 
 	return false;
 }
+
 
 
 

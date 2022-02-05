@@ -15,6 +15,7 @@ class USkeletalMeshComponent;
 class USGameInstance;
 class AItemWeapon;
 class APickupBase;
+class USkeletalMeshComponent;
 
 
 
@@ -56,6 +57,9 @@ public:
 
 	void EquipWeapon();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void HoldAiming(bool bForward);
+
 	
 
 protected:
@@ -74,6 +78,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* FPSCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FPSArms;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MouseInput, meta = (AllowPrivateAccess = "true"))
 	float MouseAimingTurnRate=.7f;

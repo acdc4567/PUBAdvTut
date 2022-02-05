@@ -200,6 +200,8 @@ protected:
 
 	bool RemoveAccessories(AItemBase* ItemAccx1,bool bIsToGround,AItemWeapon* Weaponx1);
 
+	void ReverseHoldAiming();
+
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -296,7 +298,7 @@ private:
 
 	APickupBase* ReadyPickupItem;
 
-	
+	bool bHoldAiming=0;
 
 
 
