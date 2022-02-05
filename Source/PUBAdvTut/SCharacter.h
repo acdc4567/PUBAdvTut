@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "ItemBase.h"
+#include "Engine/DataTable.h"
 #include "SCharacter.generated.h"
 
 class USpringArmComponent;
@@ -60,6 +61,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HoldAiming(bool bForward);
 
+	UFUNCTION(BlueprintCallable)
+	void SwitchCamera(bool bIsFirst);
 	
 
 protected:
@@ -100,10 +103,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MouseInput, meta = (AllowPrivateAccess = "true"))
 	ASPlayerController* MyPlayerControllerRef;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	bool bIsAiming=0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	bool bIsSightAiming=0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CharacterPose, meta = (AllowPrivateAccess = "true"))
@@ -149,8 +152,7 @@ private:
 	USGameInstance* GameInstanceRef;
 
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerAnimState, meta = (AllowPrivateAccess = "true"))
-	E_MontageType PlayingMontageType;
+	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ProneEquipMontage;
@@ -200,6 +202,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* FPSArmFireMontage;
 
+	FString ArmsLocationTablePath;
+
+	UDataTable* ArmsLocationTableObject;
+
 
 
 public:	
@@ -243,7 +249,12 @@ public:
 	FORCEINLINE void SetIsOnTheAir(bool Value) {  bIsOnTheAir=Value; }
 	FORCEINLINE void SetIsFreeFalling(bool Value) {  bIsFreeFalling=Value; }
 	FORCEINLINE void SetIsUmbrellaOpened(bool Value) {  bIsUmbrellaOpened=Value; }
+	FORCEINLINE void SetIsSightAiming(bool Value) {  bIsSightAiming=Value; }
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerAnimState)
+	E_MontageType PlayingMontageType;
+
+
 	UFUNCTION(BlueprintCallable)
 	void SetIsPlayingMontage(bool Value);
 	

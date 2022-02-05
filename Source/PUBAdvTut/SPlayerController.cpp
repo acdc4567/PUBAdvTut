@@ -185,30 +185,35 @@ void ASPlayerController::MovingOnTheGround(bool bIsForward,float AxisValue,FRota
 }
 
 void ASPlayerController::MoveForwardKeyPressed(float AxisValue){
-    if(MoveForwardAxis!=AxisValue){
-        MoveForwardAxis=AxisValue;
-        UpdateCameraHeight();
-		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+    if(!(MyCharacterRef->GetIsProne()&&MyCharacterRef->GetIsAiming())){
+	
+		if(MoveForwardAxis!=AxisValue){
+			MoveForwardAxis=AxisValue;
+			UpdateCameraHeight();
+			MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
 
-    }
-    
-    
-    MovingOnTheGround(1,AxisValue,GetControllerxRotation());
-
+		}
+		
+		
+		MovingOnTheGround(1,AxisValue,GetControllerxRotation());
+	}
 
 }
 
 
 void ASPlayerController::MoveRightKeyPressed(float AxisValue){
-    if(MoveRightAxis!=AxisValue){
-        MoveRightAxis=AxisValue;
-        UpdateCameraHeight();
-		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
-    }
     
-    
-    MovingOnTheGround(0,AxisValue,GetControllerxRotation());
-
+	if(!(MyCharacterRef->GetIsProne()&&MyCharacterRef->GetIsAiming())){
+	
+		if(MoveRightAxis!=AxisValue){
+			MoveRightAxis=AxisValue;
+			UpdateCameraHeight();
+			MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+		}
+		
+		
+		MovingOnTheGround(0,AxisValue,GetControllerxRotation());
+	}
 
 }
 
@@ -294,11 +299,13 @@ void ASPlayerController::CrouchKeyPressed(){
 void ASPlayerController::ProneKeyPressed(){
     if(MyCharacterRef->GetIsProne()){
         MyCharacterRef->SetIsProne(0);
+		ReverseHoldAiming();
         HandleProneTimeFromTable(3,1);
     }
     else{
         if(MyCharacterRef->GetIsCrouching()){
-            MyCharacterRef->SetIsCrouching(0);
+            MyCharacterRef->SetIsAiming(0);
+			MyCharacterRef->SetIsCrouching(0);
             MyCharacterRef->SetIsProne(1);
            
 			ReverseHoldAiming();
@@ -306,6 +313,7 @@ void ASPlayerController::ProneKeyPressed(){
 
         }
         else{
+			MyCharacterRef->SetIsAiming(0);
             MyCharacterRef->SetIsProne(1);
             ReverseHoldAiming();
             HandleProneTimeFromTable(1,3);
@@ -656,38 +664,72 @@ void ASPlayerController::Event_EquipmentChanged( AItemBase* Equipment,bool bIsAd
 }
 
 void ASPlayerController::AimingKeyPressed(){
-	if(MyCharacterRef->GetIsHoldWeapon()){
-		bHoldAiming=1;
-		MyCharacterRef->SetIsAiming(1);
-		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
-		MyCharacterRef->HoldAiming(1);
+	if(!(MyCharacterRef->GetIsProne()&&(MoveForwardAxis!=0||MoveRightAxis!=0))&&!MyCharacterRef->GetIsSightAiming()&&(!MyCharacterRef->GetIsPlayingMontage()||MyCharacterRef->PlayingMontageType==E_MontageType::EMT_Fire)){
+		RightPressedTime=GetWorld()->GetTimeSeconds();
+		if(MyCharacterRef->GetIsHoldWeapon()){
+			bHoldAiming=1;
+			MyCharacterRef->SetIsAiming(1);
+			MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+			MyCharacterRef->HoldAiming(1);
+		}
+		if(PlayerStateRef->GetHoldGun()){
+			//PlayerStateRef->GetHoldGun()->FireTime=0.f;
+		}
 
 	}
-
 	
-	
-
 }
 
 void ASPlayerController::AimingKeyReleased(){
-	if(bHoldAiming){
-		bHoldAiming=0;
 	
-		MyCharacterRef->SetIsAiming(0);
-		MyCharacterRef->HoldAiming(0);
-		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+	if(MyCharacterRef->GetIsHoldWeapon()){
+		if(MyCharacterRef->GetIsSightAiming()){
+			MyCharacterRef->SwitchCamera(0);
+			MyCharacterRef->HoldAiming(0);
+			MyCharacterRef->SetIsSightAiming(0);
+		}
+		else{
+			if(GetWorld()->GetTimeSeconds()-RightPressedTime<.25f){
+				MyCharacterRef->SetIsSightAiming(1);
+				bHoldAiming=0;
+			}
+			else{
+				MyCharacterRef->SetIsAiming(0);
+				if(bHoldAiming){
+					bHoldAiming=0;
+					MyCharacterRef->HoldAiming(0);
+					MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+				}
+			}
+
+
+		}
+
 	}
+	
+	
 }
 
 void ASPlayerController::ReverseHoldAiming(){
-	if(bHoldAiming){
-		bHoldAiming=0;
 	
-		MyCharacterRef->SetIsAiming(0);
+	if(MyCharacterRef->GetIsSightAiming()){
+		MyCharacterRef->SwitchCamera(0);
 		MyCharacterRef->HoldAiming(0);
-		MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
-	}
+		MyCharacterRef->SetIsSightAiming(0);
 
+	}
+	else{
+		MyCharacterRef->SetIsAiming(0);
+		if(bHoldAiming){
+			bHoldAiming=0;
+		
+			MyCharacterRef->SetIsAiming(0);
+			MyCharacterRef->HoldAiming(0);
+			MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+		}
+	}
+	
+	
 }
 
 
@@ -1269,7 +1311,10 @@ void ASPlayerController::UpdateCharacterGunState(){
 }
 
 void ASPlayerController::TakeBackGunMontage(){
-
+	if(PlayerStateRef->GetHoldGun()){
+		MyCharacterRef->SetIsAiming(0);
+		ReverseHoldAiming();
+	}
 	MyCharacterRef->PlayMontage(E_MontageType::EMT_UnEquip);
 
 }
@@ -1297,7 +1342,7 @@ void ASPlayerController::Keyboard1KeyPressed(){
 	ReadyEquipWeapon =PlayerStateRef->GetWeapon1();
 	if(ReadyEquipWeapon){
 		MyCharacterRef->SetIsAiming(0);			
-		//ReverseHoldAiming();
+		ReverseHoldAiming();
 		if(PlayerStateRef->GetHoldGun()){
 			//ReleaseFire();
 			MyCharacterRef->PlayMontage(E_MontageType::EMT_UnEquip);
@@ -1313,7 +1358,7 @@ void ASPlayerController::Keyboard2KeyPressed(){
 	ReadyEquipWeapon =PlayerStateRef->GetWeapon2();
 	if(ReadyEquipWeapon){
 		MyCharacterRef->SetIsAiming(0);	
-		//ReverseHoldAiming();
+		ReverseHoldAiming();
 		if(PlayerStateRef->GetHoldGun()){
 			MyCharacterRef->PlayMontage(E_MontageType::EMT_UnEquip);
 		}

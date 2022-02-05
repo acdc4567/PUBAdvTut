@@ -46,6 +46,10 @@ ASCharacter::ASCharacter()
 	FPSArms=CreateDefaultSubobject<USkeletalMeshComponent>("FPSArms");
 	FPSArms->SetupAttachment(FPSCamera);
 
+	ArmsLocationTablePath=TEXT("DataTable'/Game/Blueprints/Datas/DataTables/DT_ArmsLocation.DT_ArmsLocation'");
+	ArmsLocationTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *ArmsLocationTablePath));	
+
+
 }
 
 
@@ -100,65 +104,69 @@ void ASCharacter::MouseLookup(float AxisValue){
 }
 
 void ASCharacter::UpdateWeaponDisplay(FName HoldSocket){
-	if(HoldSocket!=TEXT("N")){											//!bIsSightAiming
+	if(!bIsSightAiming){
 
 	
-		if(HoldSocket!=TEXT("None")){
+		if(HoldSocket!=TEXT("N")){											//!bIsSightAiming
 
-			if(PlayerStateRef->GetHoldGun()){
-				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(HoldSocket);
-				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
-				PlayerStateRef->GetHoldGun()->SetActorTransform(SocketTransform);
-				PlayerStateRef->GetHoldGun()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),HoldSocket);
+		
+			if(HoldSocket!=TEXT("None")){
 
+				if(PlayerStateRef->GetHoldGun()){
+					const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(HoldSocket);
+					const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+					PlayerStateRef->GetHoldGun()->SetActorTransform(SocketTransform);
+					PlayerStateRef->GetHoldGun()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),HoldSocket);
+
+				}
 			}
+			bool bIsEquipBackpack;
+
+
+			TArray<AItemBase*> GetEquipmentsx1=PlayerStateRef->GetEquipments();
+			for(int32 i=0;i<GetEquipmentsx1.Num();i++){
+				if(GetEquipmentsx1[i]->ItemType==E_ItemType::EIT_Backpack){
+					bIsEquipBackpack=true;
+				}
+			}
+
+
+			if(PlayerStateRef->GetWeapon1()){
+				if(bIsEquipBackpack){
+					const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackLeftBName);
+					const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+					PlayerStateRef->GetWeapon1()->SetActorTransform(SocketTransform);
+					PlayerStateRef->GetWeapon1()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackLeftBName);
+
+				}
+				else{
+					const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackLeftNName);
+					const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+					PlayerStateRef->GetWeapon1()->SetActorTransform(SocketTransform);
+					PlayerStateRef->GetWeapon1()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackLeftNName);
+
+				}
+			}
+
+			if(PlayerStateRef->GetWeapon2()){
+				if(bIsEquipBackpack){
+					const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackRightBName);
+					const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+					PlayerStateRef->GetWeapon2()->SetActorTransform(SocketTransform);
+					PlayerStateRef->GetWeapon2()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackRightBName);
+
+				}
+				else{
+					const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackRightNName);
+					const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
+					PlayerStateRef->GetWeapon2()->SetActorTransform(SocketTransform);
+					PlayerStateRef->GetWeapon2()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackRightNName);
+
+				}
+			}
+
 		}
-		bool bIsEquipBackpack;
-
-
-		TArray<AItemBase*> GetEquipmentsx1=PlayerStateRef->GetEquipments();
-		for(int32 i=0;i<GetEquipmentsx1.Num();i++){
-			if(GetEquipmentsx1[i]->ItemType==E_ItemType::EIT_Backpack){
-				bIsEquipBackpack=true;
-			}
-		}
-
-
-		if(PlayerStateRef->GetWeapon1()){
-			if(bIsEquipBackpack){
-				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackLeftBName);
-				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
-				PlayerStateRef->GetWeapon1()->SetActorTransform(SocketTransform);
-				PlayerStateRef->GetWeapon1()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackLeftBName);
-
-			}
-			else{
-				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackLeftNName);
-				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
-				PlayerStateRef->GetWeapon1()->SetActorTransform(SocketTransform);
-				PlayerStateRef->GetWeapon1()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackLeftNName);
-
-			}
-		}
-
-		if(PlayerStateRef->GetWeapon2()){
-			if(bIsEquipBackpack){
-				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackRightBName);
-				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
-				PlayerStateRef->GetWeapon2()->SetActorTransform(SocketTransform);
-				PlayerStateRef->GetWeapon2()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackRightBName);
-
-			}
-			else{
-				const USkeletalMeshSocket* GunSocket =GetMesh()->GetSocketByName(GameInstanceRef->BackRightNName);
-				const FTransform SocketTransform = GunSocket->GetSocketTransform(GetMesh());
-				PlayerStateRef->GetWeapon2()->SetActorTransform(SocketTransform);
-				PlayerStateRef->GetWeapon2()->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),GameInstanceRef->BackRightNName);
-
-			}
-		}
-
-	}
+	}	
 }
 
 void ASCharacter::UpdateEquipmentDisplay(){
@@ -403,7 +411,115 @@ void ASCharacter::PlayMontage(E_MontageType MontageType,float PlayRatex1){
 }
 
 
+void ASCharacter::SwitchCamera(bool bIsFirst){
 
+	FPSArms->SetVisibility(bIsFirst,true);
+	UActorComponent* TempFPSCamera=Cast<UActorComponent>(FPSCamera);
+	if(TempFPSCamera){
+		TempFPSCamera->SetActive(bIsFirst,false);
+	}
+	GetMesh()->SetVisibility(!bIsFirst,true);
+	UActorComponent* TempFollowCamera=Cast<UActorComponent>(FollowCamera);
+	if(TempFollowCamera){
+		TempFollowCamera->SetActive(!bIsFirst,false);
+	}
+
+	//NextStep
+	if(PlayerStateRef->GetHoldGun()){
+		AActor* TempHoldGun=Cast<AActor>(PlayerStateRef->GetHoldGun());
+		
+		if(bIsFirst){
+			const USkeletalMeshSocket* FPSArmWeaponSocket=FPSArms->GetSocketByName("WeaponSocket");
+			FTransform FPSArmWeaponSocketTransform ;
+			if(FPSArmWeaponSocket){
+				FPSArmWeaponSocketTransform = FPSArmWeaponSocket->GetSocketTransform(FPSArms);
+				TempHoldGun->SetActorTransform(FPSArmWeaponSocketTransform);
+				TempHoldGun->AttachToComponent(FPSArms,FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),TEXT("WeaponSocket"));
+				PlayerStateRef->GetHoldGun()->SkeletalMesh->SetVisibility(true,true);
+
+			}
+		}
+		else{
+			FName TPPSocketName=MyPlayerControllerRef-> CalculateHoldGunSocket();
+			const USkeletalMeshSocket* TPPWeaponSocket=GetMesh()->GetSocketByName(TPPSocketName);
+			FTransform TPPWeaponSocketTransform ;
+			if(TPPWeaponSocket){
+				TPPWeaponSocketTransform = TPPWeaponSocket->GetSocketTransform(GetMesh());
+				TempHoldGun->SetActorTransform(TPPWeaponSocketTransform);
+				TempHoldGun->AttachToComponent(GetMesh(),FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),TPPSocketName);
+				PlayerStateRef->GetHoldGun()->SkeletalMesh->SetVisibility(true,true);
+
+			}
+		}
+		//Next Steps
+
+		if(PlayerStateRef->GetHoldGun()->SightAccActorx1){
+			if(PlayerStateRef->GetHoldGun()->SightAccActorx1->ID==TEXT("2")){
+				PlayerStateRef->GetHoldGun()->SightAccActorx1->SetActorRelativeScale3D(FVector(.1f,1.f,1.f));
+				FPSCamera->SetFieldOfView(28.f);
+				FPSArms->SetVisibility(false,false);
+			}
+			else{
+				PlayerStateRef->GetHoldGun()->SightAccActorx1->SetActorRelativeScale3D(FVector(1.f,1.f,1.f));
+				FPSCamera->SetFieldOfView(90.f);
+			}
+		}
+
+
+		if(bIsFirst){
+			FSTR_ArmsLocation* ArmsLocationRow=nullptr;
+			FName TempAccID=TEXT("0");
+			
+			if(PlayerStateRef->GetHoldGun()->SightAccActorx1){
+				TempAccID=PlayerStateRef->GetHoldGun()->SightAccActorx1->ID;
+
+			}
+
+			if(PlayerStateRef->GetHoldGun()->ID==TEXT("1")&&TempAccID==TEXT("0")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("1_0"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("2")&&TempAccID==TEXT("0")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("2_0"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("3")&&TempAccID==TEXT("0")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("3_0"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("1")&&TempAccID==TEXT("1")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("1_1"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("2")&&TempAccID==TEXT("1")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("2_1"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("3")&&TempAccID==TEXT("1")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("3_1"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("1")&&TempAccID==TEXT("2")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("1_2"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("2")&&TempAccID==TEXT("2")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("2_2"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			else if(PlayerStateRef->GetHoldGun()->ID==TEXT("3")&&TempAccID==TEXT("2")){
+				ArmsLocationRow = ArmsLocationTableObject->FindRow<FSTR_ArmsLocation>(FName("3_2"), TEXT(""));
+				FPSArms->SetRelativeLocation(ArmsLocationRow->Location);
+			}
+			
+
+
+
+		}
+   
+	}
+
+}
 
 
 

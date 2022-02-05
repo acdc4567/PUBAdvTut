@@ -439,6 +439,24 @@ enum class E_MontageType : uint8
 	
 };
 
+
+
+USTRUCT(BlueprintType)
+struct FSTR_ArmsLocation : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Location;
+
+	
+};
+
+
+
+
+
+
 UCLASS()
 class PUBADVTUT_API AItemBase : public AActor
 {

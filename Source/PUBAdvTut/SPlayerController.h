@@ -87,7 +87,7 @@ public:
 
 	void EquipWeapon();
 
-
+	FName CalculateHoldGunSocket();
 
 protected:
 	virtual void BeginPlay() override;
@@ -139,7 +139,7 @@ protected:
 
 	void HandleWalkSpeedFromTable();
 
-	FName CalculateHoldGunSocket();
+	
 
 	void InteractionKeyPressed();
 
@@ -299,6 +299,9 @@ private:
 	APickupBase* ReadyPickupItem;
 
 	bool bHoldAiming=0;
+
+	float RightPressedTime=0.f;
+	
 
 
 
