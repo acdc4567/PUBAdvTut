@@ -63,6 +63,14 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SwitchCamera(bool bIsFirst);
+
+	void PlayReloadxMontage(float PlayRatex1=1.f);
+
+	void Event_ReloadEnd();
+
+	void ExecuteReload();
+
+	void PlayReloadBulletMontage();
 	
 
 protected:
@@ -249,7 +257,7 @@ public:
 	FORCEINLINE void SetIsOnTheAir(bool Value) {  bIsOnTheAir=Value; }
 	FORCEINLINE void SetIsFreeFalling(bool Value) {  bIsFreeFalling=Value; }
 	FORCEINLINE void SetIsUmbrellaOpened(bool Value) {  bIsUmbrellaOpened=Value; }
-	FORCEINLINE void SetIsSightAiming(bool Value) {  bIsSightAiming=Value; }
+	void SetIsSightAiming(bool Value);
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerAnimState)
 	E_MontageType PlayingMontageType;
@@ -259,9 +267,9 @@ public:
 	void SetIsPlayingMontage(bool Value);
 	
 	
+	void PlayFPSFireMontage();
 
-
-
+	void PlayTPPFireMontage();
 
 
 

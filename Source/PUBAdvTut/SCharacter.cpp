@@ -559,6 +559,83 @@ void ASCharacter::EquipWeapon(){
 	MyPlayerControllerRef->EquipWeapon();
 }
 
+void ASCharacter::PlayFPSFireMontage(){
+	UAnimInstance* AnimInstancex = FPSArms->GetAnimInstance();
+	if(AnimInstancex&&FPSArmFireMontage){
+		AnimInstancex->Montage_Play(FPSArmFireMontage);
+		AnimInstancex->Montage_JumpToSection(FName("Default"));
+				
+	}
+
+}
+
+void ASCharacter::PlayTPPFireMontage(){
+	PlayMontage(E_MontageType::EMT_Fire);
+
+
+}
+
+void ASCharacter::SetIsSightAiming(bool Value){
+	
+	bIsSightAiming=Value; 
+	if(bIsSightAiming){
+		PlayerStateRef->GetHoldGun()->bCanPlayFiringFlash=0;
+	}
+	else{
+		PlayerStateRef->GetHoldGun()->bCanPlayFiringFlash=1;
+	}
+}
+
+void ASCharacter::PlayReloadxMontage(float PlayRatex1){
+	PlayMontage(E_MontageType::EMT_Reload,PlayRatex1);
+}
+
+void ASCharacter::Event_ReloadEnd(){
+
+	MyPlayerControllerRef->Event_ReloadEnd();
+
+}
+
+void ASCharacter::ExecuteReload(){
+	MyPlayerControllerRef->ExecuteReload();
+}
+
+void ASCharacter::PlayReloadBulletMontage(){
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	PlayingMontageType=E_MontageType::EMT_ReloadBullet;
+	bIsPlayingMontage=true;
+	if(!bIsProne){
+		if (AnimInstance && ReloadMontage)
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+			AnimInstance->Montage_JumpToSection(FName("ReloadBullet"));
+		}
+	}
+	else{
+		if (AnimInstance && ProneReloadMontage)
+		{
+			AnimInstance->Montage_Play(ProneReloadMontage);
+			AnimInstance->Montage_JumpToSection(FName("ReloadBullet"));
+		}
+	}
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

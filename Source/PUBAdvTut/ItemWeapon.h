@@ -11,11 +11,11 @@
 
 class USkeletalMeshComponent;
 class UStaticMeshComponent;
-//class ASPlayerState;
+class ASPlayerState;
 class UAudioComponent;
-//class ASCharacter;
-//class UPUBGAdvancedTutGI;
-//class ASPlayerController;
+class ASCharacter;
+class USGameInstance;
+class ASPlayerController;
 /**
  * 
  */
@@ -45,20 +45,22 @@ class PUBADVTUT_API AItemWeapon : public AItemBase
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	USkeletalMeshComponent* SkeletalMesh;
 
-	//void SwitchShootMode();
+	void SwitchShootMode();
 
-	//void PressFire();
+	void PressFire();
 
-	//void AutoFire();
+	void AutoFire();
 
-	//void ReleaseFire();
+	void ReleaseFire();
 
-	//int32 CheckAmmoAmount();
+	int32 CheckAmmoAmount();
 
-	//void ReloadClip();
+	void ReloadClip();
 
-	//UFUNCTION(BlueprintCallable)
-	//void FilledClip();
+	void ChangeBullets();
+
+	void FilledClip();
+
 
 protected:
 
@@ -71,6 +73,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void PlayFireFlash();
+
+	
 
 
 private:
@@ -94,8 +98,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* FireSound;
 
-	
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* FireFlash;
 
@@ -104,23 +106,26 @@ private:
 
 	UDataTable* ItemWeaponTableObject;
 
-	//float FireInterval;
+	float FireInterval;
 
-	//ASCharacter* MyCharacterRef;
+	ASPlayerState* MyPlayerStateRef;
 
-	//ASPlayerState* MyPlayerStateRef;
+	USGameInstance* MyGameInstanceRef;
 
-	//UPUBGAdvancedTutGI* MyGameInstanceRef;
+	ASPlayerController* MyPlayerControllerRef;
 
-	//ASPlayerController* MyPlayerControllerRef;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	bool bIsSightOpen=0;
 
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	bool bNeedReloadBullet=0;
+
 	
 
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon,meta=(ExposeOnSpawn="true"))
-	int32 Ammo;
+	int32 Ammo=0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon,meta=(ExposeOnSpawn="true"))
 	E_WeaponPosition Position;
@@ -140,16 +145,22 @@ public:
 
 	AItemWeaponAcc* ButtstockAccActorx1;
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon,meta=(ExposeOnSpawn="true"))
-	//E_ShootMode ShootModex1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon,meta=(ExposeOnSpawn="true"))
+	E_ShootMode ShootModex1;
 
-	//FGate FireGate;
+	FGate FireGate;
 
-	//FTimerHandle TH_FireTimerInProgress;
+	FTimerHandle TH_FireTimerInProgress;
 
-	//bool bCanPlayFiringFlash=true;
+	bool bCanPlayFiringFlash=true;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
-	//float FireTime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	float FireTime;
+
+	FORCEINLINE bool GetIsSightOpen() const { return bIsSightOpen; }
+	
+	FORCEINLINE bool GetNeedReloadBullet() const { return bNeedReloadBullet; }
+	FORCEINLINE void SetNeedReloadBullet(bool Value) {  bNeedReloadBullet=Value; }
+	
 
 };

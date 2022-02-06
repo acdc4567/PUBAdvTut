@@ -78,6 +78,9 @@ public:
 	UFUNCTION()
 	void Event_EquipmentChanged( AItemBase* Equipment,bool bIsAdd );
 
+	UFUNCTION()
+	void Event_ItemsInBackpackChanged( AItemBase* Item,bool bIsAdd);
+
 	void SetPickupItems(TArray<APickupBase*> Items);
 
 	UFUNCTION()
@@ -88,6 +91,12 @@ public:
 	void EquipWeapon();
 
 	FName CalculateHoldGunSocket();
+
+	void Event_ReloadEnd();
+
+	void ExecuteReload();
+
+	void ReverseHoldAiming();
 
 protected:
 	virtual void BeginPlay() override;
@@ -200,7 +209,22 @@ protected:
 
 	bool RemoveAccessories(AItemBase* ItemAccx1,bool bIsToGround,AItemWeapon* Weaponx1);
 
-	void ReverseHoldAiming();
+	
+
+	void ShootModeKeyPressed();
+
+	void FireKeyPressed();
+
+	void FireKeyReleased();
+
+	void ReleaseFire();
+
+	void StopAimState();
+
+	void ReloadKeyPressed();
+
+	
+
 
 private:
 
@@ -301,7 +325,7 @@ private:
 	bool bHoldAiming=0;
 
 	float RightPressedTime=0.f;
-	
+
 
 
 

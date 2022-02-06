@@ -85,13 +85,13 @@ void ASPlayerState::SetHoldGun(AItemWeapon* Weapon){
 
 void ASPlayerState::SetAmmo556(int32 Ammo556x){
     Ammo556 = Ammo556x;
-    UpdateAmmoObject();
+    //UpdateAmmoObject();
     OnAmmoChanged.Broadcast(true);
 }
 
 void ASPlayerState::SetAmmo762(int32 Ammo762x){
     Ammo762 = Ammo762x;
-    UpdateAmmoObject();
+    //UpdateAmmoObject();
     OnAmmoChanged.Broadcast(true);
 }
 
@@ -167,90 +167,99 @@ bool ASPlayerState::CheckBackpackCapacity(int32 AddWeight){
 void ASPlayerState::UpdateAmmoObject(){
     AItemBase* Ammo1;
     AItemBase* Ammo2;
+    int32 Ammo1Amt=GetAmmo556();
+    int32 Ammo2Amt=GetAmmo762();
     for(int32 i=0;i<ItemsInBackpack.Num();i++){
         if(ItemsInBackpack[i]->ItemType==E_ItemType::EIT_Ammo){
             if(ItemsInBackpack[i]->ID==TEXT("1")){
                 Ammo1=ItemsInBackpack[i];
             }
-            else{
+            else if(ItemsInBackpack[i]->ID==TEXT("2")){
                 Ammo2=ItemsInBackpack[i];
             }
         }    
     }
     //Ammo1
-    if(GetAmmo556()>0){
-        if(Ammo1){
-            Ammo1->Amount=GetAmmo556();
-        }
-        else{
-            AItemAmmo* TempAmmo;
-            FTransform TempTransform;
-            TempTransform.SetLocation(FVector::ZeroVector);
-            TempTransform.SetRotation(FQuat(0,0,0,0));
-            TempTransform.SetScale3D(FVector(1.f,1.f,1.f));
-            TempAmmo=GetWorld()->SpawnActorDeferred<AItemAmmo>(AItemAmmo::StaticClass(),TempTransform);
-            if(TempAmmo){
-                
-                
-                TempAmmo->ID=TEXT("1");
-                
-                TempAmmo->SN=GameInstanceRef->GenerateSN();
-                TempAmmo->Amount=GetAmmo556();	
-                
-                
-                UGameplayStatics::FinishSpawningActor(TempAmmo,TempTransform);
-            }
-            AItemBase* TempItemBase=Cast<AItemBase>(TempAmmo);
-            AddItemsInBackpack(TempItemBase);
-        }
-        
-    }
-    else{
-        if(Ammo1){
-            
-            RemoveItemsInBackpack(Ammo1);
-            bool bIsDestroyed=Cast<AActor>(Ammo1)->Destroy();
-		
-        }
-    }
+    if(Ammo1){
 
+        
+        if(Ammo1Amt>0){
+            if(Ammo1){
+                Ammo1->Amount=Ammo1Amt;
+            }
+            else{
+                AItemAmmo* TempAmmo;
+                FTransform TempTransform;
+                TempTransform.SetLocation(FVector::ZeroVector);
+                TempTransform.SetRotation(FQuat(0,0,0,0));
+                TempTransform.SetScale3D(FVector(1.f,1.f,1.f));
+                TempAmmo=GetWorld()->SpawnActorDeferred<AItemAmmo>(AItemAmmo::StaticClass(),TempTransform);
+                if(TempAmmo){
+                    
+                    
+                    TempAmmo->ID=TEXT("1");
+                    
+                    TempAmmo->SN=GameInstanceRef->GenerateSN();
+                    TempAmmo->Amount=Ammo1Amt;	
+                    
+                    
+                    UGameplayStatics::FinishSpawningActor(TempAmmo,TempTransform);
+                }
+                AItemBase* TempItemBase=Cast<AItemBase>(TempAmmo);
+                AddItemsInBackpack(TempItemBase);
+            }
+            
+        }
+
+        else{
+            if(Ammo1){
+                
+                RemoveItemsInBackpack(Ammo1);
+                Ammo1->Destroy();
+            
+            }
+        }
+    }
     //Ammo2
-    if(GetAmmo762()>0){
-        if(Ammo2){
-            Ammo2->Amount=GetAmmo762();
+    if(Ammo2){
+
+    
+        if(Ammo2Amt>0){
+            if(Ammo2){
+                Ammo2->Amount=Ammo2Amt;
+            }
+            else{
+                AItemAmmo* TempAmmo;
+                FTransform TempTransform;
+                TempTransform.SetLocation(FVector::ZeroVector);
+                TempTransform.SetRotation(FQuat(0,0,0,0));
+                TempTransform.SetScale3D(FVector(1.f,1.f,1.f));
+                TempAmmo=GetWorld()->SpawnActorDeferred<AItemAmmo>(AItemAmmo::StaticClass(),TempTransform);
+                if(TempAmmo){
+                    
+                    
+                    TempAmmo->ID=TEXT("2");
+                    
+                    TempAmmo->SN=GameInstanceRef->GenerateSN();
+                    TempAmmo->Amount=Ammo2Amt;	
+                    
+                    
+                    UGameplayStatics::FinishSpawningActor(TempAmmo,TempTransform);
+                }
+                AItemBase* TempItemBase=Cast<AItemBase>(TempAmmo);
+                AddItemsInBackpack(TempItemBase);
+            }
+            
         }
         else{
-            AItemAmmo* TempAmmo;
-            FTransform TempTransform;
-            TempTransform.SetLocation(FVector::ZeroVector);
-            TempTransform.SetRotation(FQuat(0,0,0,0));
-            TempTransform.SetScale3D(FVector(1.f,1.f,1.f));
-            TempAmmo=GetWorld()->SpawnActorDeferred<AItemAmmo>(AItemAmmo::StaticClass(),TempTransform);
-            if(TempAmmo){
+            if(Ammo2){
                 
-                
-                TempAmmo->ID=TEXT("2");
-                
-                TempAmmo->SN=GameInstanceRef->GenerateSN();
-                TempAmmo->Amount=GetAmmo762();	
-                
-                
-                UGameplayStatics::FinishSpawningActor(TempAmmo,TempTransform);
-            }
-            AItemBase* TempItemBase=Cast<AItemBase>(TempAmmo);
-            AddItemsInBackpack(TempItemBase);
-        }
-        
-    }
-    else{
-        if(Ammo2){
+                RemoveItemsInBackpack(Ammo2);
+                Ammo2->Destroy();
             
-            RemoveItemsInBackpack(Ammo2);
-            bool bIsDestroyed=Cast<AActor>(Ammo2)->Destroy();
-		
+            }
         }
     }
-
 
 
 }
@@ -381,10 +390,10 @@ void ASPlayerState::UpdateWeaponAcc(E_WeaponPosition Positionx1,E_WeaponAccType 
 int32 ASPlayerState::GetAmmoAmount(FName IDx){
 
     if(IDx==TEXT("1")){
-        return GetAmmo556();
+        return 40;
     }
-    else{
-        return GetAmmo762();
+    else if(IDx==TEXT("2")){
+        return 40;
     }
     return 0;
 

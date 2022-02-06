@@ -45,6 +45,7 @@ void ASPlayerController::BeginPlay()
     if(PlayerStateRef){
 		PlayerStateRef->OnWeaponChanged.AddDynamic(this,&ASPlayerController::Event_WeaponChanged);
 		PlayerStateRef->OnEquipmentChanged.AddDynamic(this,&ASPlayerController::Event_EquipmentChanged);
+		PlayerStateRef->OnItemChanged.AddDynamic(this,&ASPlayerController::Event_ItemsInBackpackChanged);
 	}
 	
 }
@@ -97,6 +98,8 @@ void ASPlayerController::Tick(float DeltaTime)
    
 	TargetingItem();
 
+	StopAimState();
+
 
 
 }
@@ -125,6 +128,10 @@ void ASPlayerController::SetupInputComponent()
     InputComponent->BindAction("Walk",IE_Pressed ,this, &ASPlayerController::WalkKeyPressed);
 	InputComponent->BindAction("Walk",IE_Released ,this, &ASPlayerController::WalkKeyReleased);
 	
+	InputComponent->BindAction("LeftShift",IE_Pressed ,this, &ASPlayerController::RunKeyPressed);
+	InputComponent->BindAction("LeftShift",IE_Released ,this, &ASPlayerController::RunKeyReleased);
+	
+
 	InputComponent->BindAction("Interaction",IE_Pressed ,this, &ASPlayerController::InteractionKeyPressed);
 	
 	InputComponent->BindAction("Aiming",IE_Pressed ,this, &ASPlayerController::AimingKeyPressed);
@@ -139,6 +146,13 @@ void ASPlayerController::SetupInputComponent()
 	InputComponent->BindAction("Keyboard1",IE_Pressed,this,&ASPlayerController::Keyboard1KeyPressed);
 	
 	InputComponent->BindAction("Keyboard2",IE_Pressed,this,&ASPlayerController::Keyboard2KeyPressed);
+
+	InputComponent->BindAction("ShootMode",IE_Pressed,this,&ASPlayerController::ShootModeKeyPressed);
+
+	InputComponent->BindAction("Fire",IE_Pressed,this,&ASPlayerController::FireKeyPressed);
+	InputComponent->BindAction("Fire",IE_Released,this,&ASPlayerController::FireKeyReleased);
+
+	InputComponent->BindAction("Reload",IE_Pressed,this,&ASPlayerController::ReloadKeyPressed);
 
 }
 
@@ -242,6 +256,7 @@ void ASPlayerController::SetCharRotation(){
 void ASPlayerController::AltKeyPressed(){
 	ReverseHoldAiming();
 	bIsAltPressed=true;
+	ReleaseFire();
     AltPressedRotation= MyCharacterRef->GetCameraBoom()->GetTargetRotation();
 
 
@@ -274,6 +289,8 @@ void ASPlayerController::CrouchKeyPressed(){
     if(MyCharacterRef->GetIsProne()){
         MyCharacterRef->SetIsProne(0);
         MyCharacterRef->SetIsCrouching(1);
+		ReverseHoldAiming();
+		ReleaseFire();
         HandleProneTimeFromTable(3,2);
     }
     else {
@@ -300,6 +317,7 @@ void ASPlayerController::ProneKeyPressed(){
     if(MyCharacterRef->GetIsProne()){
         MyCharacterRef->SetIsProne(0);
 		ReverseHoldAiming();
+		ReleaseFire();
         HandleProneTimeFromTable(3,1);
     }
     else{
@@ -309,6 +327,7 @@ void ASPlayerController::ProneKeyPressed(){
             MyCharacterRef->SetIsProne(1);
            
 			ReverseHoldAiming();
+			ReleaseFire();
 			HandleProneTimeFromTable(3,2);
 
         }
@@ -316,6 +335,7 @@ void ASPlayerController::ProneKeyPressed(){
 			MyCharacterRef->SetIsAiming(0);
             MyCharacterRef->SetIsProne(1);
             ReverseHoldAiming();
+			ReleaseFire();
             HandleProneTimeFromTable(1,3);
         }
 
@@ -348,6 +368,7 @@ void ASPlayerController::JumpKeyPressed(){
 			}
 			else{
 				MyCharacterRef->Jump();
+				ReleaseFire();
 
 			}
 		}
@@ -507,6 +528,9 @@ void ASPlayerController::WalkKeyReleased(){
 void ASPlayerController::RunKeyPressed(){
     bRunPressed=1;
     SmoothIncrease();
+	if(!MyCharacterRef->GetIsSightAiming()){
+		ReverseHoldAiming();
+	}
 }
 
 void ASPlayerController::RunKeyReleased(){
@@ -663,6 +687,18 @@ void ASPlayerController::Event_EquipmentChanged( AItemBase* Equipment,bool bIsAd
 
 }
 
+void ASPlayerController::Event_ItemsInBackpackChanged( AItemBase* Item,bool bIsAdd){
+	if(bIsAdd){
+		UE_LOG(LogTemp,Warning,TEXT("ItemAdded"));
+	}
+	else{
+		UE_LOG(LogTemp,Warning,TEXT("ItemRemoved"));
+	}
+	
+
+
+}
+
 void ASPlayerController::AimingKeyPressed(){
 	if(!(MyCharacterRef->GetIsProne()&&(MoveForwardAxis!=0||MoveRightAxis!=0))&&!MyCharacterRef->GetIsSightAiming()&&(!MyCharacterRef->GetIsPlayingMontage()||MyCharacterRef->PlayingMontageType==E_MontageType::EMT_Fire)){
 		RightPressedTime=GetWorld()->GetTimeSeconds();
@@ -673,7 +709,7 @@ void ASPlayerController::AimingKeyPressed(){
 			MyCharacterRef->HoldAiming(1);
 		}
 		if(PlayerStateRef->GetHoldGun()){
-			//PlayerStateRef->GetHoldGun()->FireTime=0.f;
+			PlayerStateRef->GetHoldGun()->FireTime=0.f;
 		}
 
 	}
@@ -1072,7 +1108,7 @@ void ASPlayerController::DiscardWeapon(AItemWeapon* ItemWeaponx1){
 		AItemWeaponAcc* TempItemBas=ItemWeaponx1->SightAccActorx1;
 		AItemBase* TempItemBase=Cast<AItemBase>(TempItemBas);
 		SpawnPickupItem(TempItemBase,TempPickupBase);
-		bool bIsDestroyed=Cast<AActor>(ItemWeaponx1->SightAccActorx1)->Destroy();
+		ItemWeaponx1->SightAccActorx1->Destroy();
 		
 	}
 	if (ItemWeaponx1->ForegripAccActorx1)
@@ -1081,7 +1117,8 @@ void ASPlayerController::DiscardWeapon(AItemWeapon* ItemWeaponx1){
 		AItemBase* TempItemBase=Cast<AItemBase>(TempItemBas);
 		
 		SpawnPickupItem(TempItemBase,TempPickupBase);
-		bool bIsDestroyed=Cast<AActor>(ItemWeaponx1->ForegripAccActorx1)->Destroy();
+		ItemWeaponx1->ForegripAccActorx1->Destroy();
+		
 		
 	}
 	if (ItemWeaponx1->MagAccActorx1)
@@ -1090,7 +1127,8 @@ void ASPlayerController::DiscardWeapon(AItemWeapon* ItemWeaponx1){
 		AItemBase* TempItemBase=Cast<AItemBase>(TempItemBas);
 		
 		SpawnPickupItem(TempItemBase,TempPickupBase);
-		bool bIsDestroyed=Cast<AActor>(ItemWeaponx1->MagAccActorx1)->Destroy();
+		ItemWeaponx1->MagAccActorx1->Destroy();
+		
 		
 	}
 	if (ItemWeaponx1->MuzzleAccActorx1)
@@ -1099,7 +1137,8 @@ void ASPlayerController::DiscardWeapon(AItemWeapon* ItemWeaponx1){
 		AItemBase* TempItemBase=Cast<AItemBase>(TempItemBas);
 		
 		SpawnPickupItem(TempItemBase,TempPickupBase);
-		bool bIsDestroyed=Cast<AActor>(ItemWeaponx1->MuzzleAccActorx1)->Destroy();
+		ItemWeaponx1->MuzzleAccActorx1->Destroy();
+		
 		
 	}
 	if (ItemWeaponx1->ButtstockAccActorx1)
@@ -1108,7 +1147,8 @@ void ASPlayerController::DiscardWeapon(AItemWeapon* ItemWeaponx1){
 		AItemBase* TempItemBase=Cast<AItemBase>(TempItemBas);
 		
 		SpawnPickupItem(TempItemBase,TempPickupBase);
-		bool bIsDestroyed=Cast<AActor>(ItemWeaponx1->ButtstockAccActorx1)->Destroy();
+		ItemWeaponx1->ButtstockAccActorx1->Destroy();
+		
 		
 	}
 	if(ItemWeaponx1->bIsOnHand){
@@ -1123,7 +1163,8 @@ void ASPlayerController::DiscardWeapon(AItemWeapon* ItemWeaponx1){
 
 		}
 	} 
-	bool bIsDestroyed=Cast<AActor>(ItemWeaponx1)->Destroy();
+	ItemWeaponx1->Destroy();
+	
 		
 }
 
@@ -1166,7 +1207,8 @@ bool ASPlayerController::PickupItem(){
 			APickupBase* TempPickupBase=Cast<APickupBase>(TempAmmo);
 			
 			if(PickupGoods(TempPickupBase)){
-				bool bIsSuccessx2=Cast<AActor>(ReadyPickupItem)->Destroy();
+				ReadyPickupItem->Destroy();
+				
 				return true;
 			}
 			else{
@@ -1180,7 +1222,8 @@ bool ASPlayerController::PickupItem(){
 			APickupBase* TempPickupBase=Cast<APickupBase>(TempHealth);
 
 			if(PickupGoods(TempPickupBase)){
-				bool bIsSuccessx3=Cast<AActor>(ReadyPickupItem)->Destroy();
+				ReadyPickupItem->Destroy();
+				
 				return true;
 			}
 			else{
@@ -1194,7 +1237,8 @@ bool ASPlayerController::PickupItem(){
 
 
 			if(PickupGoods(TempPickupBase)){
-				bool bIsSuccessx4=Cast<AActor>(ReadyPickupItem)->Destroy();
+				ReadyPickupItem->Destroy();
+				
 				return true;
 			}
 			else{
@@ -1211,7 +1255,8 @@ bool ASPlayerController::PickupItem(){
 			APickupBase* TempPickupBase=Cast<APickupBase>(TempEquipment);
 
 			bool bIsSucceed=PickupEquipment(TempPickupBase);
-			bool bIsSuccessx3=Cast<AActor>(ReadyPickupItem)->Destroy();
+			ReadyPickupItem->Destroy();
+			
 			if(!bIsSucceed){
 				return false;
 			}
@@ -1312,6 +1357,7 @@ void ASPlayerController::UpdateCharacterGunState(){
 
 void ASPlayerController::TakeBackGunMontage(){
 	if(PlayerStateRef->GetHoldGun()){
+		ReleaseFire();
 		MyCharacterRef->SetIsAiming(0);
 		ReverseHoldAiming();
 	}
@@ -1344,11 +1390,11 @@ void ASPlayerController::Keyboard1KeyPressed(){
 		MyCharacterRef->SetIsAiming(0);			
 		ReverseHoldAiming();
 		if(PlayerStateRef->GetHoldGun()){
-			//ReleaseFire();
+			ReleaseFire();
 			MyCharacterRef->PlayMontage(E_MontageType::EMT_UnEquip);
 		}
 		else{
-			//ReleaseFire();
+			ReleaseFire();
 			MyCharacterRef->PlayMontage(E_MontageType::EMT_Equip);
 		}
 	}
@@ -1413,7 +1459,8 @@ bool ASPlayerController::PickupGoods(APickupBase* PickupBasex1){
 				PlayerStateRef->AddItemsInBackpack(TempItemBase);
 		}
 		else if(PickupBasex1->ItemType==E_ItemType::EIT_Ammo){
-			PlayerStateRef->UpdateAmmoAmount(PickupBasex1->ID,true,PickupBasex1->Amount);
+			APickupAmmo* TempAmmo=Cast<APickupAmmo>(PickupBasex1);
+			PlayerStateRef->UpdateAmmoAmount(TempAmmo->ID,true,TempAmmo->Amount);
 
 		}
 		else if(PickupBasex1->ItemType==E_ItemType::EIT_Health){
@@ -1481,7 +1528,8 @@ void ASPlayerController::DiscardItem(AItemBase* Itemx1){
 	}
 	if(Itemx1){
 		PlayerStateRef->RemoveItemsInBackpack(Itemx1);
-		bool bIsDestroyed=Cast<AActor>(Itemx1)->Destroy();
+		Itemx1->Destroy();
+		
 	
 	}
 }
@@ -1505,8 +1553,8 @@ bool ASPlayerController::DiscardEquipment(AItemBase* Itemx1,bool bIsCheck){
 	APickupBase* TempPickupBase;
 	SpawnPickupItem(Itemx1,TempPickupBase);
 	PlayerStateRef->RemoveEquipment(Itemx1);
-
-	bool bIsDestroyed=Cast<AActor>(Itemx1)->Destroy();
+	Itemx1->Destroy();
+	
 	return true;
 }
 
@@ -1671,7 +1719,8 @@ bool ASPlayerController::EquipAccessories(AItemBase* ItemBasex1,bool bIsFromGrou
 			UGameplayStatics::FinishSpawningActor(TempWeaponAccObjx1,TempTransform);
 		}
 		WeaponAccObjx1=Cast<AItemBase>(TempWeaponAccObjx1);
-		bool bIsDestroyed=Cast<AActor>(ItemBasex1)->Destroy();
+		ItemBasex1->Destroy();
+		
 	}
 	else{
 		PlayerStateRef->RemoveItemsInBackpack(ItemBasex1);
@@ -1696,7 +1745,8 @@ bool ASPlayerController::RemoveAccessories(AItemBase* ItemAccx1,bool bIsToGround
 		if(TempItemAcc){
 			PlayerStateRef->UpdateWeaponAcc(Weaponx1->Position,TempItemAcc->AccType,nullptr);
 		}
-		bool bIsDestroyed=Cast<AActor>(ItemAccx1)->Destroy(); 		
+		ItemAccx1->Destroy(); 		
+		
 	}
 	else{
 		bool TempBackpackCapacity=PlayerStateRef->CheckBackpackCapacity(ItemAccx1->GetWeight());
@@ -1717,6 +1767,123 @@ bool ASPlayerController::RemoveAccessories(AItemBase* ItemAccx1,bool bIsToGround
 
 	return false;
 }
+
+void ASPlayerController::ShootModeKeyPressed(){
+
+	if(PlayerStateRef->GetHoldGun()){
+		PlayerStateRef->GetHoldGun()->SwitchShootMode();
+	}
+
+}
+
+
+void ASPlayerController::FireKeyPressed(){
+
+	if((PlayerStateRef->GetHoldGun()&&bEnableMove)&&!(MyCharacterRef->GetIsProne()&&MyCharacterRef->GetVelocity().Size()!=0)&&!bIsAltPressed&&!(MyCharacterRef->GetCharacterMovement()->IsFalling())){
+		if(!PlayerStateRef->GetHoldGun()->GetNeedReloadBullet()){
+			if(!MyCharacterRef->GetIsPlayingMontage()||MyCharacterRef->PlayingMontageType==E_MontageType::EMT_Fire){
+				
+				PlayerStateRef->GetHoldGun()->PressFire();
+			}	
+		}
+			
+	}
+
+
+}
+
+void ASPlayerController::FireKeyReleased(){
+
+	if(PlayerStateRef->GetHoldGun()){
+		PlayerStateRef->GetHoldGun()->ReleaseFire();
+	}
+
+
+}
+
+void ASPlayerController::ReleaseFire(){
+
+	if(PlayerStateRef->GetHoldGun()){
+		PlayerStateRef->GetHoldGun()->ReleaseFire();
+	}
+
+}
+
+void ASPlayerController::StopAimState(){
+	if(!bHoldAiming&&!MyCharacterRef->GetIsSightAiming()){
+		if(PlayerStateRef->GetHoldGun()){
+			if(PlayerStateRef->GetHoldGun()->FireTime>0){
+				if(GetWorld()->GetTimeSeconds()-PlayerStateRef->GetHoldGun()->FireTime>3.f){
+					MyCharacterRef->SetIsAiming(0);
+					PlayerStateRef->GetHoldGun()->FireTime=0.f;
+				}
+			}
+		}
+	}
+}
+
+void ASPlayerController::ReloadKeyPressed(){
+	if((PlayerStateRef->GetHoldGun()&&bEnableMove)&&!bIsAltPressed&&!(MyCharacterRef->GetCharacterMovement()->IsFalling())){
+		if(!MyCharacterRef->GetIsPlayingMontage()||MyCharacterRef->PlayingMontageType==E_MontageType::EMT_Fire){
+			if(PlayerStateRef->GetHoldGun()){
+				PlayerStateRef->GetHoldGun()->ReloadClip();
+			}
+		}
+	}
+
+
+}
+
+void ASPlayerController::Event_ReloadEnd(){
+	if(MyCharacterRef->PlayingMontageType==E_MontageType::EMT_Reload){
+		PlayerStateRef->GetHoldGun()->FilledClip();
+		PlayerStateRef->GetHoldGun()->SetNeedReloadBullet(0);
+	}
+	else{
+		PlayerStateRef->GetHoldGun()->SetNeedReloadBullet(0);
+		MyCharacterRef->SetIsAiming(1);
+		if(PlayerStateRef->GetHoldGun()->GetIsSightOpen()){
+			MyCharacterRef->HoldAiming(1);
+			MyCharacterRef->SetIsSightAiming(1);
+			MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+		}
+		else{
+			MyCharacterRef->UpdateWeaponDisplay(CalculateHoldGunSocket());
+		
+		}
+		
+	}
+
+
+}
+
+void ASPlayerController::ExecuteReload(){
+	PlayerStateRef->GetHoldGun()->ChangeBullets();
+
+	
+	if(PlayerStateRef->GetHoldGun()->Ammo==0){
+		if((PlayerStateRef->GetHoldGun()&&bEnableMove)&&!bIsAltPressed&&!(MyCharacterRef->GetCharacterMovement()->IsFalling())){
+			if(!MyCharacterRef->GetIsPlayingMontage()||MyCharacterRef->PlayingMontageType==E_MontageType::EMT_Fire){
+				if(PlayerStateRef->GetHoldGun()){
+					PlayerStateRef->GetHoldGun()->ReloadClip();
+				}
+			}
+		}
+
+	}
+
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

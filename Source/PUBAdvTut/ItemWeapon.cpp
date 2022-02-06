@@ -5,10 +5,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 
-//#include "SPlayerState.h"
-//#include "SCharacter.h"
-//#include "PUBGAdvancedTutGI.h"
-//#include "SPlayerController.h"
+#include "SPlayerState.h"
+#include "SCharacter.h"
+#include "SGameInstance.h"
+#include "SPlayerController.h"
 #include "Components/AudioComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -42,7 +42,7 @@ AItemWeapon::AItemWeapon(){
     ItemWeaponTablePath=TEXT("DataTable'/Game/Blueprints/Datas/DataTables/DT_ItemWeapon.DT_ItemWeapon'");
 	ItemWeaponTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *ItemWeaponTablePath));	
 
-    //FireSound=CreateDefaultSubobject<UAudioComponent>("FireSound");
+    FireSound=CreateDefaultSubobject<UAudioComponent>("FireSound");
 
     
 }
@@ -52,9 +52,9 @@ void AItemWeapon::BeginPlay()
 	Super::BeginPlay();
     
    
-    //MyPlayerControllerRef=Cast<ASPlayerController>(UGameplayStatics::GetPlayerController(this,0));
-   // MyPlayerStateRef=Cast<ASPlayerState>(MyPlayerControllerRef->PlayerState);
-   // MyGameInstanceRef=Cast<UPUBGAdvancedTutGI>(UGameplayStatics::GetGameInstance(GetWorld()));
+    MyPlayerControllerRef=Cast<ASPlayerController>(UGameplayStatics::GetPlayerController(this,0));
+    MyPlayerStateRef=Cast<ASPlayerState>(MyPlayerControllerRef->PlayerState);
+    MyGameInstanceRef=Cast<USGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
 }
 
@@ -85,7 +85,7 @@ void AItemWeapon::OnConstruction(const FTransform& Transform){
         Buttstock->AttachToComponent(SkeletalMesh,FAttachmentTransformRules(EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative, true),TEXT("Socket_Buttstock"));
     }
 
-    //FireInterval=ItemWeaponRow->FiringInterval;
+    FireInterval=ItemWeaponRow->FiringInterval;
     
 }
 
@@ -204,7 +204,7 @@ void AItemWeapon::PlayFireFlash(){
     }
 }
 
-/*
+
 void AItemWeapon::SwitchShootMode(){
     if(ItemWeaponRow->bAutoMode){
         if(ShootModex1==E_ShootMode::ESM_Single){
@@ -240,10 +240,10 @@ void AItemWeapon::AutoFire(){
             if(bCanPlayFiringFlash){
                 PlayFireFlash();
             }
-            CharacterRef->bIsAiming=true;
-            FName HoldGunSkt=CharacterRef->CalculateHoldGunSocket();
+            CharacterRef->SetIsAiming(1);
+            FName HoldGunSkt=MyPlayerControllerRef->CalculateHoldGunSocket();
             CharacterRef->UpdateWeaponDisplay(HoldGunSkt);
-            if(CharacterRef->bIsSightAiming){
+            if(CharacterRef->GetIsSightAiming()){
                 CharacterRef->PlayFPSFireMontage();
 
             }
@@ -253,6 +253,11 @@ void AItemWeapon::AutoFire(){
 
             FireTime=GetWorld()->GetTimeSeconds();
             --Ammo;
+
+            if(ItemWeaponRow->ReplaceBulletTime>0){
+                bNeedReloadBullet=1;
+            }
+
         }
         else{
             UE_LOG(LogTemp,Warning,TEXT("NoBullets"));
@@ -295,6 +300,7 @@ int32 AItemWeapon::CheckAmmoAmount(){
     return 0;
 }
 
+
 void AItemWeapon::ReloadClip(){
     float ReloadRate=0.f;
     if(MagAccActorx1){
@@ -315,20 +321,33 @@ void AItemWeapon::ReloadClip(){
         CharacterRef->PlayReloadxMontage(ReloadRate);
     }
     if(CharacterRef->GetIsAiming()||CharacterRef->GetIsSightAiming()){
-        CharacterRef->ReverseHoldAiming();
+        MyPlayerControllerRef->ReverseHoldAiming();
     }
 
 }
-*/
 
 
-/*
+
+
 void AItemWeapon::FilledClip(){
     int32 CheckedAmmoAmt=CheckAmmoAmount();
     Ammo+=CheckedAmmoAmt;
-    MyPlayerStateRef->UpdateAmmoAmount(ItemWeaponRow->UseAmmoID,0,CheckedAmmoAmt);
+    MyPlayerStateRef->UpdateAmmoAmount(ItemWeaponRow->UseAmmoID,1,CheckedAmmoAmt);
 }
-*/
+
+
+void AItemWeapon::ChangeBullets(){
+
+    if(ItemWeaponRow->ReplaceBulletTime>0){
+        if(Ammo>0){
+            bIsSightOpen=CharacterRef->GetIsSightAiming();
+
+           
+            MyPlayerControllerRef->ReverseHoldAiming();
+            CharacterRef->PlayReloadBulletMontage();
+        }
+    }
+}
 
 
 

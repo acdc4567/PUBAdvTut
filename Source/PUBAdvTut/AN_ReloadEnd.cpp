@@ -9,7 +9,7 @@ void UAN_ReloadEnd::Notify(USkeletalMeshComponent* MeshComp,UAnimSequenceBase* A
     if(MeshComp!=NULL&&MeshComp->GetOwner()!=NULL){
         ASCharacter* MyCharacterRef=Cast<ASCharacter>(MeshComp->GetOwner());
         if(MyCharacterRef!=NULL){
-            MyCharacterRef->LogIt();
+            MyCharacterRef->Event_ReloadEnd();
         }   
     }
 }

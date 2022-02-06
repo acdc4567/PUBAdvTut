@@ -9,7 +9,7 @@ void UAN_OnReloadEnd_Prone::Notify(USkeletalMeshComponent* MeshComp,UAnimSequenc
     if(MeshComp!=NULL&&MeshComp->GetOwner()!=NULL){
         ASCharacter* MyCharacterRef=Cast<ASCharacter>(MeshComp->GetOwner());
         if(MyCharacterRef!=NULL){
-            MyCharacterRef->LogIt();
+            MyCharacterRef->Event_ReloadEnd();
         }   
     }
 }

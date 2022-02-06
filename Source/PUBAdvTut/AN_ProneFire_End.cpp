@@ -9,7 +9,7 @@ void UAN_ProneFire_End::Notify(USkeletalMeshComponent* MeshComp,UAnimSequenceBas
     if(MeshComp!=NULL&&MeshComp->GetOwner()!=NULL){
         ASCharacter* MyCharacterRef=Cast<ASCharacter>(MeshComp->GetOwner());
         if(MyCharacterRef!=NULL){
-            MyCharacterRef->LogIt();
+            MyCharacterRef->ExecuteReload();
         }   
     }
 }
