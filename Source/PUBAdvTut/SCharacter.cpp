@@ -22,6 +22,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraShakeBase.h"
 
 
 
@@ -622,6 +623,23 @@ void ASCharacter::PlayReloadBulletMontage(){
 
 }
 
+void ASCharacter::PlayCameraShakex1(){
+	if(MyShake){
+		MyPlayerControllerRef->PlayerCameraManager->StartCameraShake(MyShake, 1.0f);
+				
+	}
+	
+
+}
+
+void ASCharacter::PlayCameraShakex2(){
+	if(MySniperShake){
+		MyPlayerControllerRef->PlayerCameraManager->StartCameraShake(MySniperShake, 1.0f);
+				
+	}
+	
+
+}
 
 
 

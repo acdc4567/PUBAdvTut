@@ -17,7 +17,7 @@ class USGameInstance;
 class AItemWeapon;
 class APickupBase;
 class USkeletalMeshComponent;
-
+class UCameraShakeBase;
 
 
 
@@ -71,6 +71,13 @@ public:
 	void ExecuteReload();
 
 	void PlayReloadBulletMontage();
+
+	void PlayCameraShakex1();
+
+	void PlayCameraShakex2();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void AddOffset(float ReadyPitch,float ReadyYaw,float Length);
 	
 
 protected:
@@ -214,7 +221,11 @@ private:
 
 	UDataTable* ArmsLocationTableObject;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> MyShake;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> MySniperShake;
 
 public:	
 	// Called every frame

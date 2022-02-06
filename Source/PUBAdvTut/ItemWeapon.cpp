@@ -200,6 +200,8 @@ void AItemWeapon::PlayFireFlash(){
             const FTransform SocketTransform = SkeletalMesh->GetSocketTransform(TEXT("Socket_Muzzle"));
             
             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireFlash, SocketTransform.GetLocation());
+
+            
         }
     }
 }
@@ -240,24 +242,55 @@ void AItemWeapon::AutoFire(){
             if(bCanPlayFiringFlash){
                 PlayFireFlash();
             }
-            CharacterRef->SetIsAiming(1);
-            FName HoldGunSkt=MyPlayerControllerRef->CalculateHoldGunSocket();
-            CharacterRef->UpdateWeaponDisplay(HoldGunSkt);
-            if(CharacterRef->GetIsSightAiming()){
-                CharacterRef->PlayFPSFireMontage();
-
-            }
-            else{
-                CharacterRef->PlayTPPFireMontage();
-            }
-
             FireTime=GetWorld()->GetTimeSeconds();
-            --Ammo;
-
             if(ItemWeaponRow->ReplaceBulletTime>0){
                 bNeedReloadBullet=1;
             }
+            if(!(CharacterRef->GetIsProne()&&!CharacterRef->GetIsSightAiming())){
 
+                
+                CharacterRef->SetIsAiming(1);
+                FName HoldGunSkt=MyPlayerControllerRef->CalculateHoldGunSocket();
+                CharacterRef->UpdateWeaponDisplay(HoldGunSkt);
+                if(CharacterRef->GetIsSightAiming()){
+                    CharacterRef->PlayFPSFireMontage();
+
+                }
+                else{
+                    CharacterRef->PlayTPPFireMontage();
+                }
+
+                //CamShakes
+                if(ItemWeaponRow->ReplaceBulletTime>0){
+                    CharacterRef->PlayCameraShakex2();
+                }
+                else{
+                    CharacterRef->PlayCameraShakex1();
+                }
+
+                //Recoil
+
+                bool bTempBool=FMath::RandBool();
+                int32 LeftDirection=-1;
+                int32 RightDirection=1;
+                float ReadyYaw=0.f;
+                float ReadyPitch=0.f;
+                if(bTempBool){
+                    ReadyYaw=ItemWeaponRow->HorizontalOffset*LeftDirection;
+                    ReadyPitch=ItemWeaponRow->VerticalOffset;
+                    CharacterRef->AddOffset(ReadyPitch,ReadyYaw,ItemWeaponRow->FiringInterval);
+                }
+                else{
+                    ReadyYaw=ItemWeaponRow->HorizontalOffset*RightDirection;
+                    ReadyPitch=ItemWeaponRow->VerticalOffset;
+                    CharacterRef->AddOffset(ReadyPitch,ReadyYaw,ItemWeaponRow->FiringInterval);
+
+                }
+                
+                --Ammo;
+
+                
+            }
         }
         else{
             UE_LOG(LogTemp,Warning,TEXT("NoBullets"));
